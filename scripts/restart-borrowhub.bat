@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM ============================================================================
-REM BorrowHub - Master Application Restart Script
+REM BorrowHub - Master Application Restart Script (Planned Service Cooldown)
 REM ============================================================================
 
 set "SCRIPT_DIR=%~dp0"

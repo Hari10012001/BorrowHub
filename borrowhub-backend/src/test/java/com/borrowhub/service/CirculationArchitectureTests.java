@@ -5,6 +5,7 @@ import com.borrowhub.model.enums.*;
 import com.borrowhub.payload.request.CheckoutRequestDto;
 import com.borrowhub.payload.response.CheckoutResponseDto;
 import com.borrowhub.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,12 @@ public class CirculationArchitectureTests {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private CirculationRetryOrchestrator circulationRetryOrchestrator;
 
     private Reservation createTestReservation(User user, Resource resource, int quantity, Instant claimDeadline) {
         BorrowingRequest req = new BorrowingRequest();
@@ -398,5 +405,24 @@ public class CirculationArchitectureTests {
         OutboxEvent completedEvent = outboxEventRepository.findById(eventId).orElseThrow();
         assertEquals(OutboxStatus.PROCESSED, completedEvent.getStatus());
         assertNull(completedEvent.getClaimedBy());
+    }
+
+    @Test
+    @DisplayName("BUG-08: CirculationRetryOrchestrator correctly serializes LocalDate in CheckoutRequestDto with Spring ObjectMapper")
+    void testBug08LocalDateSerialization() {
+        CheckoutRequestDto dto = new CheckoutRequestDto();
+        dto.setResourceId(6L);
+        dto.setUserId(1L);
+        dto.setQuantity(1);
+        dto.setDueDate(LocalDate.now().plusDays(7));
+        dto.setNotes("BUG-08 regression test verification");
+
+        // Verify that Spring-injected ObjectMapper serializes and deserializes JSR-310 LocalDate
+        assertDoesNotThrow(() -> {
+            String json = objectMapper.writeValueAsString(dto);
+            assertTrue(json.contains(dto.getDueDate().toString()), "Serialized JSON must contain ISO-8601 formatted LocalDate");
+            CheckoutRequestDto deserialized = objectMapper.readValue(json, CheckoutRequestDto.class);
+            assertEquals(dto.getDueDate(), deserialized.getDueDate(), "Deserialized LocalDate must match original");
+        }, "Serialization of CheckoutRequestDto with LocalDate must not throw InvalidDefinitionException");
     }
 }

@@ -1,22 +1,32 @@
-# BorrowHub Safe Performance & Latency Benchmark
+# BorrowHub Rigorous Performance & Latency Benchmark with Statistical Percentiles
 $ErrorActionPreference = "Continue"
 
 Write-Host "============================================================================" -ForegroundColor Cyan
-Write-Host " [BorrowHub] Executing Performance & API Latency Benchmark" -ForegroundColor Cyan
+Write-Host " [BorrowHub] Executing Performance & Latency Statistical Benchmark" -ForegroundColor Cyan
 Write-Host "============================================================================" -ForegroundColor Cyan
 
 $baseUrl = "http://localhost:8080"
 $benchmarks = @()
+
+function Get-Percentile {
+    param([double[]]$Values, [double]$Percentile)
+    if ($Values.Count -eq 0) { return 0 }
+    $sorted = $Values | Sort-Object
+    $index = [Math]::Ceiling(($Percentile / 100.0) * $sorted.Count) - 1
+    if ($index -lt 0) { $index = 0 }
+    if ($index -ge $sorted.Count) { $index = $sorted.Count - 1 }
+    return [Math]::Round($sorted[$index], 2)
+}
 
 function Measure-Endpoint {
     param(
         [string]$Name,
         [string]$Url,
         [hashtable]$Headers = @{},
-        [int]$Iterations = 25
+        [int]$Iterations = 50
     )
     Write-Host ("Benchmarking: $Name ($Iterations iterations)...")
-    $times = @()
+    [double[]]$times = @()
     $errors = 0
 
     # Warmup
@@ -28,7 +38,7 @@ function Measure-Endpoint {
         try {
             $resp = Invoke-RestMethod -Uri $Url -Headers $Headers -TimeoutSec 5
             $sw.Stop()
-            $times += $sw.ElapsedMilliseconds
+            $times += [double]$sw.ElapsedMilliseconds
         } catch {
             $sw.Stop()
             $errors++
@@ -37,8 +47,11 @@ function Measure-Endpoint {
     $swTotal.Stop()
 
     $avg = if ($times.Count -gt 0) { [Math]::Round(($times | Measure-Object -Average).Average, 2) } else { 0 }
-    $min = if ($times.Count -gt 0) { ($times | Measure-Object -Minimum).Minimum } else { 0 }
-    $max = if ($times.Count -gt 0) { ($times | Measure-Object -Maximum).Maximum } else { 0 }
+    $min = if ($times.Count -gt 0) { [Math]::Round(($times | Measure-Object -Minimum).Minimum, 2) } else { 0 }
+    $max = if ($times.Count -gt 0) { [Math]::Round(($times | Measure-Object -Maximum).Maximum, 2) } else { 0 }
+    $median = Get-Percentile -Values $times -Percentile 50
+    $p95 = Get-Percentile -Values $times -Percentile 95
+    $p99 = Get-Percentile -Values $times -Percentile 99
     $throughput = [Math]::Round($Iterations / ($swTotal.ElapsedMilliseconds / 1000), 2)
     $errorRate = [Math]::Round(($errors / $Iterations) * 100, 2)
 
@@ -46,33 +59,36 @@ function Measure-Endpoint {
         Endpoint   = $Name
         Samples    = $Iterations
         AvgMs      = $avg
-        MinMs      = $min
+        MedianMs   = $median
+        p95Ms      = $p95
+        p99Ms      = $p99
         MaxMs      = $max
+        MinMs      = $min
         Throughput = "$throughput req/s"
         ErrorRate  = "$errorRate%"
     }
     $script:benchmarks += $obj
-    Write-Host ("  Avg: ${avg}ms | Min: ${min}ms | Max: ${max}ms | Throughput: $throughput req/s | Errors: $errorRate%")
+    Write-Host ("  Avg: ${avg}ms | Median: ${median}ms | p95: ${p95}ms | p99: ${p99}ms | Max: ${max}ms | Errors: $errorRate%")
 }
 
 # 1. Health check latency
-Measure-Endpoint "Actuator Health Check" "$baseUrl/actuator/health" @{} 30
+Measure-Endpoint "Actuator Health Check" "$baseUrl/actuator/health" @{} 50
 
 # 2. Public Catalog listing latency
-Measure-Endpoint "Public Resource Catalog" "$baseUrl/api/resources" @{} 30
+Measure-Endpoint "Public Resource Catalog" "$baseUrl/api/resources" @{} 50
 
 # 3. Category tree latency
-Measure-Endpoint "Category Hierarchy" "$baseUrl/api/categories" @{} 25
+Measure-Endpoint "Category Hierarchy" "$baseUrl/api/categories" @{} 50
 
 # 4. Authenticated profile latency
 $loginBody = @{ username = "student1"; password = "Student@123" } | ConvertTo-Json
 $loginResp = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Body $loginBody -ContentType "application/json"
 $token = $loginResp.data.token
 $authHeaders = @{ Authorization = "Bearer $token" }
-Measure-Endpoint "Authenticated User Profile" "$baseUrl/api/auth/me" $authHeaders 25
+Measure-Endpoint "Authenticated User Profile" "$baseUrl/api/auth/me" $authHeaders 50
 
-Write-Host "============================================================================" -ForegroundColor Cyan
-Write-Host " [BorrowHub RESULT] PERFORMANCE BENCHMARK SUMMARY:" -ForegroundColor Cyan
+Write-Host "`n============================================================================" -ForegroundColor Cyan
+Write-Host " [BorrowHub RESULT] STATISTICAL PERFORMANCE BENCHMARK SUMMARY:" -ForegroundColor Cyan
 $benchmarks | Format-Table -AutoSize | Out-String | Write-Host
 
 # Save to reports

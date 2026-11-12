@@ -38,7 +38,7 @@ if "%MYSQL_EXE%"=="" (
 )
 
 echo Connecting to database 'borrowhub_db' on localhost:3306...
-echo You will be prompted for password (default development: BorrowHub@2026).
+echo You will be prompted to enter the database user password securely.
 echo.
 "%MYSQL_EXE%" -u borrowhub_user -p -h localhost -P 3306 borrowhub_db
 

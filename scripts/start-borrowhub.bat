@@ -67,7 +67,15 @@ echo.
 echo [3/6] Checking Backend Spring Boot Service (Port 8080)...
 netstat -ano | findstr /R /C:":8080 .*LISTENING" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    echo   [PASS] Backend service is already running on port 8080.
+    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+        "try { $h = Invoke-RestMethod -Uri 'http://localhost:8080/actuator/health' -TimeoutSec 2; if ($h.status -eq 'UP') { exit 0 } else { exit 1 } } catch { exit 1 }"
+    if !ERRORLEVEL! EQU 0 (
+        echo   [PASS] BorrowHub backend is already running and healthy on port 8080.
+        goto :START_FRONTEND
+    ) else (
+        echo   [BorrowHub WARNING] Port 8080 is occupied by another process or unready backend.
+        echo   Attempting to continue or probe readiness...
+    )
 ) else (
     echo   Backend service is not running. Launching Spring Boot server...
     set "BACKEND_JAR=%PROJECT_ROOT%\borrowhub-backend\target\borrowhub-backend-1.0.0.jar"
@@ -121,7 +129,14 @@ echo.
 echo [5/6] Checking Frontend Web Server (Port 5173)...
 netstat -ano | findstr /R /C:":5173 .*LISTENING" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    echo   [PASS] Frontend server is already running on port 5173.
+    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+        "try { $f = Invoke-WebRequest -Uri 'http://localhost:5173' -UseBasicParsing -TimeoutSec 2; exit 0 } catch { exit 1 }"
+    if !ERRORLEVEL! EQU 0 (
+        echo   [PASS] Frontend server is already active and serving on port 5173.
+        goto :LAUNCH_BROWSER
+    ) else (
+        echo   [BorrowHub WARNING] Port 5173 is listening but did not respond to HTTP probe.
+    )
 ) else (
     echo   Frontend server is not running. Launching Vite dev server...
     cd /d "%PROJECT_ROOT%\borrowhub-frontend"
@@ -143,15 +158,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
     "try { $f = Invoke-WebRequest -Uri 'http://localhost:5173' -UseBasicParsing -TimeoutSec 2; exit 0 } catch { exit 1 }"
 if %ERRORLEVEL% EQU 0 (
     echo   [PASS] Frontend Web Application is ACTIVE and serving pages!
-    goto :FINISH_STARTUP
+    goto :LAUNCH_BROWSER
 )
 set /a FE_WAIT+=1
 if %FE_WAIT% GEQ 30 (
-    echo [BorrowHub WARNING] Frontend server did not respond within 30 seconds.
-    echo Please inspect log file: %FRONTEND_LOG%
+    echo [BorrowHub ERROR] Frontend server failed to report ready within 30 seconds.
+    echo Browser launch aborted. Please inspect log file: %FRONTEND_LOG%
+    pause
+    exit /b 1
 )
+goto :POLL_FRONTEND
 
-:FINISH_STARTUP
+:LAUNCH_BROWSER
 echo.
 echo [6/6] Launching Application in Default Browser...
 start "" "http://localhost:5173"

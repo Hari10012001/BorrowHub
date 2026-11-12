@@ -30,12 +30,14 @@ public class CirculationRetryOrchestrator {
 
     private final CirculationTransactionalService transactionalService;
     private final IdempotencyService idempotencyService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     public CirculationRetryOrchestrator(CirculationTransactionalService transactionalService,
-                                        IdempotencyService idempotencyService) {
+                                        IdempotencyService idempotencyService,
+                                        ObjectMapper objectMapper) {
         this.transactionalService = transactionalService;
         this.idempotencyService = idempotencyService;
+        this.objectMapper = objectMapper;
     }
 
     @Retryable(
