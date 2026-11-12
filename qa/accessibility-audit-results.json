@@ -12,38 +12,22 @@
   },
   "ResourceCatalogPage": {
     "url": "/catalog",
-    "violationsCount": 1,
-    "violations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "nodes": 3
-      }
-    ],
+    "violationsCount": 0,
+    "violations": [],
     "severitySummary": {
       "critical": 0,
-      "serious": 1,
+      "serious": 0,
       "moderate": 0,
       "minor": 0
     }
   },
   "StudentBorrowingsPage": {
     "url": "/borrowings",
-    "violationsCount": 1,
-    "violations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "nodes": 213
-      }
-    ],
+    "violationsCount": 0,
+    "violations": [],
     "severitySummary": {
       "critical": 0,
-      "serious": 1,
+      "serious": 0,
       "moderate": 0,
       "minor": 0
     }

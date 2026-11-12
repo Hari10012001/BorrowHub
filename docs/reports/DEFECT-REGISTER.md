@@ -1,9 +1,9 @@
 # BorrowHub (APPJFS12) — Master Defect Register & Resolution Log
 
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Audit Date:** 2026-11-12  
 **Auditor:** Principal Java Architect & Quality Assurance Lead  
-**Scope:** Post-Implementation Verification & Defect Remediation  
+**Scope:** Post-Implementation Verification & Final Defect Closure  
 
 ---
 
@@ -19,7 +19,12 @@
 | **BUG-06** | Medium | Integration Tests | `qa/integration/test-all-flows.ps1`| **RESOLVED** | Dynamic ID Extraction |
 | **BUG-07** | Medium | Database Integrity | `qa/integration/test-all-flows.ps1`| **RESOLVED** | QUANTITY Tracking Mode Resource |
 | **BUG-08** | High | Application Core | `CirculationRetryOrchestrator.java` | **RESOLVED** | Spring ObjectMapper Injection |
-| **BUG-09** | Low | Accessibility (a11y) | `borrowhub-frontend` Badges | **DOCUMENTED** | Axe-Core Playwright Scan |
+| **BUG-09** | Low | Accessibility (a11y) | `borrowhub-frontend` Badges/Headers | **RESOLVED** | Axe-Core Playwright Scan |
+
+**Summary Statistics:**
+- **Total Defects Identified:** 9
+- **Total Defects Resolved:** 9 (100%)
+- **Active / Unresolved Defects:** 0
 
 ---
 
@@ -150,13 +155,27 @@
 
 ---
 
-### BUG-09: Axe-Core WCAG 2 AA Color Contrast Violation on Status Badges
-- **Defect Title:** Status badges on Resource Catalog and Borrowings pages fall below WCAG 2 AA 4.5:1 minimum color contrast ratio.
+### BUG-09: Axe-Core WCAG 2 AA Color Contrast Violations on Badges and Navigation Headers
+- **Defect Title:** Status badges, table column headers, and sidebar navigation headers fell below WCAG 2 AA 4.5:1 minimum color contrast ratio.
 - **Severity:** Low / Aesthetic
 - **Category:** Accessibility (WCAG 2.1 AA)
-- **Affected Component:** `borrowhub-frontend/src/pages/catalog/ResourceCatalogPage.jsx`, `MyBorrowingsPage.jsx`
+- **Affected Components:**
+  - `borrowhub-frontend/src/components/common/Badge.jsx`
+  - `borrowhub-frontend/src/pages/catalog/ResourceCatalogPage.jsx`
+  - `borrowhub-frontend/src/pages/borrowing/MyBorrowingsPage.jsx`
+  - `borrowhub-frontend/src/components/layout/Sidebar.jsx`
 - **Root Cause Analysis:**  
-  Tailwind CSS badge classes using light colored text on pastel backgrounds (e.g., `text-emerald-700` on `bg-emerald-100`, `text-slate-400` on white) measured contrast ratios of ~3.8:1 to 4.1:1, failing the strict WCAG 2 AA 4.5:1 ratio requirement.
-- **Resolution Plan:**  
-  Adjust Tailwind color classes to `text-emerald-800` / `bg-emerald-100` and `text-slate-600` / `bg-white` in subsequent UI polish cycle.
-- **Status:** **DOCUMENTED (Non-Blocking)**
+  - In `Badge.jsx`, variant text colors used 700-shades on 50-tints (e.g., `text-emerald-700` on `bg-emerald-50`, `text-amber-700` on `bg-amber-50`), yielding ratios between 3.8:1 and 4.4:1 (below the 4.5:1 threshold).
+  - In `MyBorrowingsPage.jsx`, table headers and metadata used `text-slate-400` on `bg-slate-50` and white backgrounds, yielding low contrast (~2.5:1).
+  - In `Sidebar.jsx`, section category labels used `text-slate-400` on white, failing WCAG AA.
+- **Fix Applied:**  
+  1. Updated `Badge.jsx` to high-contrast WCAG AAA palettes (`text-blue-900`, `text-emerald-900`, `text-amber-950`, `text-rose-900`, `text-indigo-900`, `text-slate-800`), achieving contrast ratios between 9.2:1 and 14.2:1.
+  2. Updated `ResourceCatalogPage.jsx` category pills and subtexts to `text-slate-700` and `text-blue-700`.
+  3. Updated `MyBorrowingsPage.jsx` `thead` to `text-slate-700` (9.5:1 ratio) and subtext labels to `text-slate-600`.
+  4. Updated `Sidebar.jsx` section headers to `text-slate-700` and `text-indigo-700`.
+- **Verification Method:**  
+  Executed `@axe-core/playwright` automated test suite across all three pages:
+  - `/login`: 0 violations
+  - `/catalog`: 0 violations (0 critical, 0 serious, 0 moderate, 0 minor)
+  - `/borrowings`: 0 violations (0 critical, 0 serious, 0 moderate, 0 minor)
+- **Status:** **RESOLVED**

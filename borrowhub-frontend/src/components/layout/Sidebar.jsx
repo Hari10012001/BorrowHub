@@ -29,7 +29,7 @@ export const Sidebar = () => {
     <aside className="w-64 border-r border-slate-200 bg-white/70 min-h-[calc(100vh-65px)] p-4 flex flex-col justify-between">
       <div className="space-y-6">
         <div>
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">
+          <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider px-3">
             Resource Catalog
           </span>
           <nav className="mt-2 space-y-1">
@@ -41,7 +41,7 @@ export const Sidebar = () => {
         </div>
 
         <div>
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">
+          <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider px-3">
             My Activity
           </span>
           <nav className="mt-2 space-y-1">
@@ -49,7 +49,7 @@ export const Sidebar = () => {
               <BookMarked className="w-4 h-4" />
               <span>My Borrowings</span>
               {user?.activeBorrowingsCount > 0 && (
-                <span className="ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 text-blue-800">
+                <span className="ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 text-blue-900">
                   {user.activeBorrowingsCount}
                 </span>
               )}
@@ -58,7 +58,7 @@ export const Sidebar = () => {
               <Clock className="w-4 h-4" />
               <span>My Reservations</span>
               {user?.activeReservationsCount > 0 && (
-                <span className="ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">
+                <span className="ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-900">
                   {user.activeReservationsCount}
                 </span>
               )}
@@ -72,7 +72,7 @@ export const Sidebar = () => {
 
         {isAdminOrFaculty && (
           <div>
-            <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider px-3">
+            <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider px-3">
               Circulation Desk
             </span>
             <nav className="mt-2 space-y-1">
@@ -90,7 +90,7 @@ export const Sidebar = () => {
 
         {isAdmin && (
           <div>
-            <span className="text-[11px] font-bold text-purple-600 uppercase tracking-wider px-3">
+            <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider px-3">
               Administration
             </span>
             <nav className="mt-2 space-y-1">
@@ -103,12 +103,12 @@ export const Sidebar = () => {
         )}
       </div>
 
-      <div className="p-3 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/80 rounded-xl text-xs text-slate-600">
-        <div className="flex items-center gap-1.5 font-semibold text-slate-800 mb-1">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+      <div className="p-3 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/80 rounded-xl text-xs text-slate-700">
+        <div className="flex items-center gap-1.5 font-semibold text-slate-900 mb-1">
+          <Sparkles className="w-3.5 h-3.5 text-blue-700" />
           <span>Central Time Arbiter</span>
         </div>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-slate-600">
           Enforcing MySQL <code>CURRENT_DATE()</code> &amp; strict Level 1-6 InnoDB locking (C42, C43).
         </p>
       </div>

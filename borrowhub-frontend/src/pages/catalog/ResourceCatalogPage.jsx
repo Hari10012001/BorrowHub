@@ -57,14 +57,14 @@ export const ResourceCatalogPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Resource Catalog</h1>
-          <p className="text-sm text-slate-500">Discover and borrow laboratory assets, computing hardware, and multimedia gear</p>
+          <p className="text-sm text-slate-600">Discover and borrow laboratory assets, computing hardware, and multimedia gear</p>
         </div>
       </div>
 
       {/* Filters Bar */}
       <div className="flex flex-col md:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
@@ -80,7 +80,7 @@ export const ResourceCatalogPage = () => {
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
               selectedCategory === null
                 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
             }`}
           >
             All Categories
@@ -92,7 +92,7 @@ export const ResourceCatalogPage = () => {
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                 selectedCategory === c.id
                   ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
               }`}
             >
               {c.name}
@@ -103,22 +103,22 @@ export const ResourceCatalogPage = () => {
 
       {/* Mode Pills */}
       <div className="flex items-center gap-2 text-xs">
-        <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Tracking Mode:</span>
+        <span className="font-semibold text-slate-600 uppercase tracking-wider text-[10px]">Tracking Mode:</span>
         <button
           onClick={() => setSelectedMode('')}
-          className={`px-2.5 py-1 rounded-lg ${selectedMode === '' ? 'bg-slate-800 text-white font-medium' : 'text-slate-600 hover:bg-slate-200'}`}
+          className={`px-2.5 py-1 rounded-lg ${selectedMode === '' ? 'bg-slate-800 text-white font-medium' : 'text-slate-700 hover:bg-slate-200'}`}
         >
           All
         </button>
         <button
           onClick={() => setSelectedMode('INDIVIDUAL')}
-          className={`px-2.5 py-1 rounded-lg ${selectedMode === 'INDIVIDUAL' ? 'bg-slate-800 text-white font-medium' : 'text-slate-600 hover:bg-slate-200'}`}
+          className={`px-2.5 py-1 rounded-lg ${selectedMode === 'INDIVIDUAL' ? 'bg-slate-800 text-white font-medium' : 'text-slate-700 hover:bg-slate-200'}`}
         >
           Serialized Assets
         </button>
         <button
           onClick={() => setSelectedMode('QUANTITY')}
-          className={`px-2.5 py-1 rounded-lg ${selectedMode === 'QUANTITY' ? 'bg-slate-800 text-white font-medium' : 'text-slate-600 hover:bg-slate-200'}`}
+          className={`px-2.5 py-1 rounded-lg ${selectedMode === 'QUANTITY' ? 'bg-slate-800 text-white font-medium' : 'text-slate-700 hover:bg-slate-200'}`}
         >
           Bulk Components
         </button>
@@ -177,21 +177,21 @@ export const ResourceCatalogPage = () => {
                   </div>
 
                   <div className="p-5 space-y-2">
-                    <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    <h3 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
                       {item.name}
                     </h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-700">
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
                     <span>Max {item.maxBorrowDays} days</span>
                   </div>
-                  <div className="flex items-center gap-1 font-semibold text-blue-600 group-hover:translate-x-0.5 transition-transform">
+                  <div className="flex items-center gap-1 font-semibold text-blue-700 group-hover:translate-x-0.5 transition-transform">
                     <span>View Details</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>

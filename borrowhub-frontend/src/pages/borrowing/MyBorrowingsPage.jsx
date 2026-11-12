@@ -57,12 +57,12 @@ export const MyBorrowingsPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Borrowings & Loans</h1>
-          <p className="text-sm text-slate-500">Track current custody windows, due dates, and return audit trails</p>
+          <p className="text-sm text-slate-600">Track current custody windows, due dates, and return audit trails</p>
         </div>
       </div>
 
       <div className="relative max-w-md">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={searchTerm}
@@ -76,15 +76,15 @@ export const MyBorrowingsPage = () => {
         <LoadingSpinner text="Loading borrowing records..." />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
-          <BookMarked className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <BookMarked className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-800">No borrowing records</h3>
-          <p className="text-xs text-slate-500 mt-1">You do not have any active or past borrowing records</p>
+          <p className="text-xs text-slate-600 mt-1">You do not have any active or past borrowing records</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="bg-slate-50 text-[11px] font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-3.5">Resource</th>
                   <th className="px-4 py-3.5">Asset Tag(s)</th>
@@ -100,7 +100,7 @@ export const MyBorrowingsPage = () => {
                   <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-6 py-4 font-semibold text-slate-800">
                       <div>{b.resourceName}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">Loan ID #{b.id}</div>
+                      <div className="text-[11px] text-slate-600 font-mono">Loan ID #{b.id}</div>
                     </td>
                     <td className="px-4 py-4">
                       {b.assetTags && b.assetTags.length > 0 ? (
@@ -112,21 +112,21 @@ export const MyBorrowingsPage = () => {
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-400">Bulk Mode</span>
+                        <span className="text-slate-600">Bulk Mode</span>
                       )}
                     </td>
                     <td className="px-4 py-4 font-medium text-slate-700">
-                      <span className="text-blue-600 font-bold">{b.quantityIssued}</span> Issued •{' '}
-                      <span className="text-amber-600 font-bold">{b.quantityOutstanding}</span> Outstanding
+                      <span className="text-blue-700 font-bold">{b.quantityIssued}</span> Issued •{' '}
+                      <span className="text-amber-800 font-bold">{b.quantityOutstanding}</span> Outstanding
                     </td>
                     <td className="px-4 py-4">{b.issueDate || '—'}</td>
                     <td className="px-4 py-4 font-semibold text-slate-800">{b.dueDate}</td>
                     <td className="px-4 py-4">{getStatusBadge(b.status)}</td>
                     <td className="px-6 py-4 text-right font-medium text-slate-700">
                       {b.actualReturnDate ? (
-                        <span className="text-emerald-700">{b.actualReturnDate}</span>
+                        <span className="text-emerald-800">{b.actualReturnDate}</span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-600">—</span>
                       )}
                     </td>
                   </tr>

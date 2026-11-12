@@ -47,8 +47,9 @@ test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
 
     console.log(`[A11y Login] Violations: ${accessibilityScanResults.violations.length} (Critical: ${violationsBySeverity.critical.length}, Serious: ${violationsBySeverity.serious.length}, Moderate: ${violationsBySeverity.moderate.length}, Minor: ${violationsBySeverity.minor.length})`);
     
-    // Check that there are 0 critical violations
+    // Verify zero critical and zero serious violations
     expect(violationsBySeverity.critical.length).toBe(0);
+    expect(violationsBySeverity.serious.length).toBe(0);
   });
 
   test('2. Axe-Core Accessibility Audit: Resource Catalog Page (Authenticated)', async ({ page }) => {
@@ -90,7 +91,13 @@ test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
 
     console.log(`[A11y Catalog] Violations: ${accessibilityScanResults.violations.length} (Critical: ${violationsBySeverity.critical.length}, Serious: ${violationsBySeverity.serious.length}, Moderate: ${violationsBySeverity.moderate.length}, Minor: ${violationsBySeverity.minor.length})`);
 
+    accessibilityScanResults.violations.forEach(v => {
+      console.log(`  Violation [${v.impact}]: ${v.id} - ${v.help}`);
+      v.nodes.forEach(n => console.log(`    Target: ${n.target.join(' ')} | HTML: ${n.html}`));
+    });
+
     expect(violationsBySeverity.critical.length).toBe(0);
+    expect(violationsBySeverity.serious.length).toBe(0);
   });
 
   test('3. Axe-Core Accessibility Audit: Student Borrowings Page', async ({ page }) => {
@@ -135,6 +142,12 @@ test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
 
     console.log(`[A11y Borrowings] Violations: ${accessibilityScanResults.violations.length} (Critical: ${violationsBySeverity.critical.length}, Serious: ${violationsBySeverity.serious.length}, Moderate: ${violationsBySeverity.moderate.length}, Minor: ${violationsBySeverity.minor.length})`);
 
+    accessibilityScanResults.violations.forEach(v => {
+      console.log(`  Violation [${v.impact}]: ${v.id} - ${v.help}`);
+      v.nodes.slice(0, 10).forEach(n => console.log(`    Target: ${n.target.join(' ')} | HTML: ${n.html}`));
+    });
+
     expect(violationsBySeverity.critical.length).toBe(0);
+    expect(violationsBySeverity.serious.length).toBe(0);
   });
 });
