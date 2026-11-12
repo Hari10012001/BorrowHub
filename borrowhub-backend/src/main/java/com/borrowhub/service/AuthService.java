@@ -98,7 +98,12 @@ public class AuthService {
         user.setDepartment(request.getDepartment() != null ? request.getDepartment() : "General");
         user.setPhone(request.getPhone());
         user.setInstitutionalId(instId);
-        user.setRole(request.getRole() != null ? request.getRole() : Role.STUDENT);
+        // Security guard: Public self-registration can NEVER assign privileged roles (ADMIN)
+        Role assignedRole = request.getRole();
+        if (assignedRole == null || assignedRole == Role.ADMIN) {
+            assignedRole = Role.STUDENT;
+        }
+        user.setRole(assignedRole);
         user.setAccountStatus(AccountStatus.ACTIVE);
 
         return userRepository.save(user);

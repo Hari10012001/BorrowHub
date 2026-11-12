@@ -27,9 +27,16 @@ dist-ssr/
 *.sw?
 .DS_Store
 
-# Logs
+# Logs & Process Runtime
 *.log
 logs/
+runtime/
+temp/
+
+# QA & Test Reports
+test-results/
+playwright-report/
+blob-report/
 
 # Secrets and environment configurations
 .env

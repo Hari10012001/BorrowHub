@@ -1,0 +1,9 @@
+﻿
+Endpoint                   Samples AvgMs MinMs MaxMs Throughput   ErrorRate
+--------                   ------- ----- ----- ----- ----------   ---------
+Actuator Health Check           30  5.13     4    10 167.6 req/s  0%       
+Public Resource Catalog         30 32.47    26    52 30.33 req/s  0%       
+Category Hierarchy              25  5.92     5    10 157.23 req/s 0%       
+Authenticated User Profile      25 10.36     9    15 91.58 req/s  0%       
+
+

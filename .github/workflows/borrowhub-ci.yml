@@ -1,0 +1,95 @@
+name: BorrowHub CI/CD Quality Pipeline
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  backend-quality-gate:
+    name: Backend Build & Architecture Verification
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0.43
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: borrowhub_db
+          MYSQL_USER: borrowhub_user
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD || 'BorrowHub@2026' }}
+        ports:
+          - 3306:3306
+        options: --default-time-zone="+05:30" --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Backend Test Suite (JUnit 5 / Spring Boot)
+        working-directory: borrowhub-backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: borrowhub_db
+          DB_USERNAME: borrowhub_user
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'BorrowHub@2026' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'borrowhub-super-secure-production-ready-jwt-signing-key-2026-appjfs12' }}
+        run: mvn clean test
+
+      - name: Package Executable Fat JAR
+        working-directory: borrowhub-backend
+        run: mvn package -DskipTests
+
+      - name: Upload Backend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: borrowhub-backend-jar
+          path: borrowhub-backend/target/*.jar
+          if-no-files-found: error
+
+  frontend-quality-gate:
+    name: Frontend Build & Unit Test Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: borrowhub-frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: borrowhub-frontend
+        run: npm ci
+
+      - name: Run Frontend Vitest Suite
+        working-directory: borrowhub-frontend
+        run: npm test
+
+      - name: Run Production Bundle Build (Vite)
+        working-directory: borrowhub-frontend
+        run: npm run build
+
+      - name: Install Playwright Browsers
+        working-directory: borrowhub-frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Upload Frontend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: borrowhub-frontend-dist
+          path: borrowhub-frontend/dist/
+          if-no-files-found: error
