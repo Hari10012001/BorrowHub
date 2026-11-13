@@ -49,3 +49,4 @@ blob-report/
 # Application runtime uploads and database storage
 uploads/
 borrowhub_mysql_data/
+database/backups/*.sql

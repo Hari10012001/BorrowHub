@@ -28,24 +28,24 @@ if %ERRORLEVEL% EQU 0 (
 
 REM Try Windows Service first
 sc query "MySQL80" >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
+if !ERRORLEVEL! EQU 0 (
     echo [BorrowHub] Attempting to start Windows Service 'MySQL80'...
     net start "MySQL80" >nul 2>&1
-    ping -n 4 127.0.0.1 >nul
+    ping -n 3 127.0.0.1 >nul
     netstat -ano | findstr /R /C:":3306 .*LISTENING" >nul 2>&1
-    if %ERRORLEVEL% EQU 0 (
+    if !ERRORLEVEL! EQU 0 (
         echo [BorrowHub] MySQL Service started successfully.
         goto :VERIFY
     )
 )
 
 sc query "MySQL" >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
+if !ERRORLEVEL! EQU 0 (
     echo [BorrowHub] Attempting to start Windows Service 'MySQL'...
     net start "MySQL" >nul 2>&1
-    ping -n 4 127.0.0.1 >nul
+    ping -n 3 127.0.0.1 >nul
     netstat -ano | findstr /R /C:":3306 .*LISTENING" >nul 2>&1
-    if %ERRORLEVEL% EQU 0 (
+    if !ERRORLEVEL! EQU 0 (
         echo [BorrowHub] MySQL Service started successfully.
         goto :VERIFY
     )
