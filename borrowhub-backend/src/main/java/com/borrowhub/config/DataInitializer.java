@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
         User admin = new User();
         admin.setUsername("admin");
         admin.setEmail("admin@borrowhub.edu");
-        admin.setPasswordHash(passwordEncoder.encode("Admin@123"));
+        admin.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_ADMIN_PASSWORD")));
         admin.setFirstName("Platform");
         admin.setLastName("Administrator");
         admin.setRole(Role.ADMIN);
@@ -72,7 +72,7 @@ public class DataInitializer implements CommandLineRunner {
         User faculty = new User();
         faculty.setUsername("faculty1");
         faculty.setEmail("faculty1@borrowhub.edu");
-        faculty.setPasswordHash(passwordEncoder.encode("Faculty@123"));
+        faculty.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_FACULTY_PASSWORD")));
         faculty.setFirstName("Robert");
         faculty.setLastName("Vance");
         faculty.setRole(Role.FACULTY);
@@ -84,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
         User staff = new User();
         staff.setUsername("staff1");
         staff.setEmail("staff1@borrowhub.edu");
-        staff.setPasswordHash(passwordEncoder.encode("Staff@123"));
+        staff.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_STAFF_PASSWORD")));
         staff.setFirstName("Sarah");
         staff.setLastName("Jenkins");
         staff.setRole(Role.ADMIN);
@@ -96,7 +96,7 @@ public class DataInitializer implements CommandLineRunner {
         User student = new User();
         student.setUsername("student1");
         student.setEmail("student1@borrowhub.edu");
-        student.setPasswordHash(passwordEncoder.encode("Student@123"));
+        student.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_STUDENT_PASSWORD")));
         student.setFirstName("Alexander");
         student.setLastName("Hayes");
         student.setRole(Role.STUDENT);
@@ -107,6 +107,15 @@ public class DataInitializer implements CommandLineRunner {
 
         userRepository.saveAll(Arrays.asList(admin, faculty, staff, student));
         logger.info("Default users seeded: admin, faculty1, staff1, student1.");
+    }
+
+
+    private String requiredSeedPassword(String variableName) {
+        String value = System.getenv(variableName);
+        if (value == null || value.isBlank() || value.startsWith("replace-with-")) {
+            throw new IllegalStateException("Set a unique local value for environment variable: " + variableName);
+        }
+        return value;
     }
 
     private void seedCategoriesAndResources() {
