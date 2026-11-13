@@ -2,6 +2,7 @@ package com.borrowhub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -12,6 +13,7 @@ import java.util.TimeZone;
 @EnableRetry
 @EnableScheduling
 @EnableTransactionManagement
+@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class BorrowHubApplication {
 
     public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package com.borrowhub.controller;
 
+import com.borrowhub.exception.BadRequestException;
 import com.borrowhub.payload.request.ReservationCreateDto;
 import com.borrowhub.payload.response.ApiResponse;
 import com.borrowhub.payload.response.ReservationResponseDto;
@@ -41,8 +42,18 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ReservationResponseDto>> getReservationById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ReservationResponseDto>> getReservationById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
         ReservationResponseDto response = reservationService.getReservationById(id);
+        boolean isOwner = response.getUserId().equals(currentUser.getId());
+        boolean isElevated = currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_FACULTY")
+                        || a.getAuthority().equals("ROLE_STAFF"));
+        if (!isOwner && !isElevated) {
+            throw new BadRequestException("You are not authorized to view this reservation");
+        }
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

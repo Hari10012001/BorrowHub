@@ -1,5 +1,6 @@
 package com.borrowhub.controller;
 
+import com.borrowhub.exception.BadRequestException;
 import com.borrowhub.payload.request.BorrowingApprovalDto;
 import com.borrowhub.payload.request.BorrowingRequestCreateDto;
 import com.borrowhub.payload.response.ApiResponse;
@@ -71,8 +72,18 @@ public class BorrowingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BorrowingRecordResponseDto>> getBorrowingRecord(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<BorrowingRecordResponseDto>> getBorrowingRecord(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
         BorrowingRecordResponseDto record = borrowingService.getRecordById(id);
+        boolean isOwner = record.getUserId().equals(currentUser.getId());
+        boolean isElevated = currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_FACULTY")
+                        || a.getAuthority().equals("ROLE_STAFF"));
+        if (!isOwner && !isElevated) {
+            throw new BadRequestException("You are not authorized to view this borrowing record");
+        }
         return ResponseEntity.ok(ApiResponse.success(record));
     }
 }
