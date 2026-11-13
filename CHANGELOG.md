@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1] - 2026-11-13
+
+### DevOps & Cloud Deployment (DockHosting Fix)
+
+#### Changed
+- **Frontend Dockerfile Port Alignment:**
+  - Changed Nginx listening port from `5173` to `80` (`listen 80; listen [::]:80;`) to match DockHosting's routed port expectations.
+  - Updated `server_name` to `_` to accept requests on all host headers and domains (`0.0.0.0:80`).
+  - Updated `EXPOSE` directive from `5173` to `80`.
+  - Preserved multi-stage build and SPA routing via `try_files $uri $uri/ /index.html;`.
+- **Node Engine Compatibility:**
+  - Upgraded builder stage base image from `node:20-alpine` to `node:22-alpine` in `borrowhub-frontend/Dockerfile` to satisfy Vite 8 engine requirements (`>=22.12.0`).
+- **Container Orchestration Alignment:**
+  - Updated `docker-compose.yml` frontend port mapping from `"${FRONTEND_PORT:-5173}:5173"` to `"${FRONTEND_PORT:-5173}:80"`.
+
+---
+
 ## [1.0.0] - 2026-11-12
 
 ### Initial Full Stack Production-Ready Release (Architecture Baseline v2.4.8)
