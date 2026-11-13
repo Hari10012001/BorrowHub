@@ -18,7 +18,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: borrowhub_db
           MYSQL_USER: borrowhub_user
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD || 'BorrowHub@2026' }}
+          MYSQL_PASSWORD: ${{ format('ci-only-{0}-db-password', github.run_id) }}
         ports:
           - 3306:3306
         options: --default-time-zone="+05:30" --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -41,8 +41,8 @@ jobs:
           DB_PORT: 3306
           DB_NAME: borrowhub_db
           DB_USERNAME: borrowhub_user
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'BorrowHub@2026' }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'borrowhub-super-secure-production-ready-jwt-signing-key-2026-appjfs12' }}
+          DB_PASSWORD: ${{ format('ci-only-{0}-db-password', github.run_id) }}
+          JWT_SECRET: ${{ format('ci-only-{0}-not-for-production-signing-key', github.run_id) }}
         run: mvn clean test
 
       - name: Package Executable Fat JAR
