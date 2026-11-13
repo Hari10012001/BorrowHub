@@ -4,9 +4,9 @@
 
 ## 1. Executive Summary
 
-**BorrowHub** is an enterprise-grade, high-concurrency resource borrowing, reservation, and inventory management platform designed for academic, laboratory, and corporate institutions. Built on **Java 21 LTS**, **Spring Boot 3.4.1**, **MySQL 8.0 InnoDB**, and **React 19 / Vite / Tailwind CSS**, BorrowHub solves classic concurrency anomalies—including double-booking, race conditions during peak checkout, lost reservation expiration, idempotency hijacking, and distributed timer drift.
+**BorrowHub** is an full-stack, concurrency-aware resource borrowing, reservation, and inventory management platform designed for academic, laboratory, and corporate institutions. Built on **Java 21 LTS**, **Spring Boot 3.4.1**, **MySQL 8.0 InnoDB**, and **React 19 / Vite / Tailwind CSS**, BorrowHub solves classic concurrency anomalies—including double-booking, race conditions during peak checkout, lost reservation expiration, idempotency hijacking, and distributed timer drift.
 
-BorrowHub establishes mathematical safety via a strict Directed Acyclic Graph (DAG) locking hierarchy, treats the MySQL database engine as the sole authoritative clock arbiter (`Asia/Kolkata` `+05:30`), eliminates JVM clock drift, and provides guaranteed once-and-only-once business execution via RFC 8785 Canonical JSON fingerprinting and transactional outbox event streaming.
+BorrowHub establishes mathematical safety via a strict Directed Acyclic Graph (DAG) locking hierarchy, treats the MySQL database engine as the sole authoritative clock arbiter (`Asia/Kolkata` `+05:30`), eliminates JVM clock drift, and provides idempotent request handling and durable event processing via RFC 8785 Canonical JSON fingerprinting and transactional outbox event streaming.
 
 ---
 
@@ -183,15 +183,10 @@ Managed under Flyway migration `V1__initial_schema.sql`:
 
 ---
 
-## 6. Pre-Seeded Default Credentials
+## 6. Local Test Accounts
 
-The database is initialized with standard roles for immediate verification:
+The project may initialize local test users through its database seed configuration. Treat all seeded accounts as development-only. Set or rotate passwords locally before demonstrations, never reuse them in shared environments, and do not publish reusable credentials in documentation.
 
-| Role | Username | Password | Full Name | Department |
-|---|---|---|---|---|
-| **Admin** | `admin` | `Admin@123` | System Administrator | IT Infrastructure |
-| **Faculty** | `faculty1` | `Faculty@123` | Dr. Alan Turing | Computer Science |
-| **Student** | `student1` | `Student@123` | John Doe | Software Engineering |
 
 ---
 
