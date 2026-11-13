@@ -17,6 +17,31 @@ set "FRONTEND_LOG=%LOGS_DIR%\frontend.log"
 if not exist "%RUNTIME_DIR%" mkdir "%RUNTIME_DIR%"
 if not exist "%LOGS_DIR%" mkdir "%LOGS_DIR%"
 
+REM Load local secrets from the ignored root .env file.
+if not exist "%PROJECT_ROOT%\.env" (
+    echo [BorrowHub ERROR] Missing .env file. Copy .env.example to .env and configure local values.
+    pause
+    exit /b 1
+)
+for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%PROJECT_ROOT%\.env") do if not "%%A"=="" set "%%A=%%B"
+
+if not defined DB_PASSWORD (
+    echo [BorrowHub ERROR] DB_PASSWORD is missing from .env.
+    pause
+    exit /b 1
+)
+if not defined JWT_SECRET (
+    echo [BorrowHub ERROR] JWT_SECRET is missing from .env.
+    pause
+    exit /b 1
+)
+if not defined BORROWHUB_SEED_ADMIN_PASSWORD (
+    echo [BorrowHub ERROR] Seed passwords are missing from .env.
+    pause
+    exit /b 1
+)
+
+
 echo ============================================================================
 echo [BorrowHub] Initializing BorrowHub Full Stack Platform
 echo ============================================================================
@@ -184,9 +209,7 @@ echo Health Check Status  : http://localhost:8080/actuator/health
 echo Backend Logs         : %BACKEND_LOG%
 echo Frontend Logs        : %FRONTEND_LOG%
 echo.
-echo Default Logins:
-echo   Administrator : admin    / Admin@123
-echo   Faculty       : faculty1 / Faculty@123
-echo   Student       : student1 / Student@123
+echo Local demo accounts are seeded using credentials from the ignored .env file.
+echo Do not share or reuse local demo passwords.
 echo ============================================================================
 exit /b 0
