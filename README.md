@@ -293,52 +293,80 @@ npm run build
 
 ---
 
-## 9. Directory Structure
+## 9. Professional Directory Structure
 
 ```
-012_BorrowHub - A Smart Resource Borrowing, Reservation and Inventory Management Platform/
-├── README.md                                # Master project documentation
-├── .gitignore
-├── .env.example
-├── borrowhub-backend/                       # Spring Boot 3.4.1 Java 21 Backend
+BorrowHub/
+├── README.md                                # Master documentation & system manual
+├── LICENSE                                  # Open-source MIT License
+├── SECURITY.md                              # Security policy, threat model & disclosure
+├── CONTRIBUTING.md                           # Developer contribution & concurrency guide
+├── CHANGELOG.md                              # Historical change log & version release notes
+├── docker-compose.yml                       # Multi-container local orchestration (DB, API, Web)
+├── .gitignore                               # Git exclusion rules (.env, build artifacts)
+├── .editorconfig                            # Universal IDE formatting rules
+├── .env.example                             # Sanitized configuration template
+│
+├── scripts/                                 # Windows .bat automation & daemon scripts (14 scripts)
+│   ├── start-borrowhub.bat                  # One-click full-stack platform startup
+│   ├── stop-borrowhub.bat                   # Process-safe PID termination utility
+│   ├── restart-borrowhub.bat                # Clean restart orchestrator
+│   ├── start-database.bat                   # MySQL daemon launcher with binary fallback
+│   ├── stop-database.bat                    # MySQL daemon stopper
+│   ├── database-status.bat                  # Real-time port & migration inspector
+│   ├── backup-database.bat                  # Automated logical database dump utility
+│   ├── health-check.bat                     # Multi-tier health diagnostic script
+│   ├── run-backend-tests.bat                # Spring Boot Maven test suite runner
+│   ├── run-frontend-tests.bat               # Vitest component test & build runner
+│   ├── run-e2e-tests.bat                    # Playwright browser & Axe a11y runner
+│   └── run-full-qa.bat                      # Master automated QA pipeline
+│
+├── docs/                                    # Comprehensive system documentation
+│   ├── architecture/
+│   │   ├── ACADEMIC-DIAGRAMS.md             # 9 IEEE/ISO System Models & Mermaid Diagrams
+│   │   └── PROJECT-STRUCTURE.md             # Architectural layers & design patterns
+│   ├── database/
+│   │   └── BACKUP_AND_RESTORE.md            # Disaster recovery & point-in-time recovery runbook
+│   ├── reports/
+│   │   ├── FINAL_AUDIT_REPORT.md            # Master comprehensive technical audit
+│   │   ├── FINAL_AUDIT_INITIAL.md           # Pre-fix discovery baseline & defect register
+│   │   ├── FINAL_EXECUTION_LOG.md           # Turn-by-turn chronological action log
+│   │   ├── FINAL_SECURITY_AUDIT.md          # OWASP Top 10 security verification report
+│   │   ├── FINAL_DATABASE_AUDIT.md          # InnoDB relational integrity & constraint audit
+│   │   ├── FINAL_TEST_REPORT.md             # 85-test reconciled master inventory report
+│   │   ├── FINAL_ACCESSIBILITY_REPORT.md    # Axe-Core WCAG 2.1 AA/AAA compliance audit
+│   │   ├── FINAL_PERFORMANCE_REPORT.md      # Statistical latency & throughput benchmarks
+│   │   └── FINAL_PROJECT_READINESS.md       # Multi-dimensional readiness evaluation
+│   ├── setup/
+│   │   ├── LOCAL-SETUP-GUIDE.md             # Workstation onboarding & prerequisites
+│   │   └── WINDOWS-BAT-GUIDE.md             # Windows automation reference manual
+│   └── testing/
+│       ├── QA-STRATEGY.md                   # Multi-tier quality assurance framework
+│       └── MANUAL-QA-CHECKLIST.md           # Step-by-step human verification checklist
+│
+├── database/                                # Database resources & scripts
+│   ├── README.md                            # Schema documentation
+│   └── BACKUP_AND_RESTORE.md                # Backup runbook
+│
+├── qa/                                      # Automated Quality Assurance Suites
+│   ├── accessibility-audit-results.json     # Machine-readable Axe-Core audit output
+│   ├── smoke/smoke-test.ps1                 # 10 live system smoke tests
+│   ├── security/security-check.ps1          # 6 automated application security tests
+│   ├── integration/test-all-flows.ps1       # 20 complete state machine workflows
+│   └── performance/perf-test.ps1            # Statistical latency benchmark (200 requests)
+│
+├── borrowhub-backend/                       # Spring Boot 3.4.1 Java 21 LTS Backend
 │   ├── pom.xml                              # Maven build descriptor
+│   ├── Dockerfile                           # Multi-stage production container image
 │   └── src/
-│       ├── main/
-│       │   ├── java/com/borrowhub/
-│       │   │   ├── BorrowHubApplication.java
-│       │   │   ├── config/                  # SecurityConfig, CorsConfig, RetryConfig
-│       │   │   ├── controller/              # Auth, Resource, Circulation, Request, Waitlist
-│       │   │   ├── exception/               # GlobalExceptionHandler, Custom Exceptions
-│       │   │   ├── model/
-│       │   │   │   ├── entity/              # 17 JPA Entities (zero JVM clock, fencing)
-│       │   │   │   └── enums/               # 15 Domain Enums
-│       │   │   ├── repository/              # 17 JPA Repositories (DAG lock ordering)
-│       │   │   ├── scheduler/               # Outbox, Expiry, Overdue Schedulers
-│       │   │   ├── security/                # JwtAuthenticationFilter, JwtTokenProvider
-│       │   │   ├── service/                 # Domain Services (Idempotency, Circulation, etc.)
-│       │   │   │   └── outbox/              # Domain Event Handlers
-│       │   │   └── util/                    # CanonicalJsonUtil (RFC 8785)
-│       │   └── resources/
-│       │       ├── application.properties   # Database, JWT, Outbox, Pool properties
-│       │       └── db/migration/
-│       │           └── V1__initial_schema.sql # 17 relational tables, check constraints
-│       └── test/java/com/borrowhub/
-│           ├── BorrowHubApplicationTests.java
-│           └── service/
-│               ├── CanonicalJsonAndIdempotencyTests.java
-│               └── CirculationArchitectureTests.java
-└── borrowhub-frontend/                      # React 19 / Vite / Tailwind Frontend
-    ├── package.json
-    ├── vite.config.js                       # Proxy configuration to :8080
-    ├── tailwind.config.js
-    ├── index.html
-    └── src/
-        ├── App.jsx                          # Route definitions
-        ├── main.jsx                         # App entrypoint
-        ├── components/                      # Common UI (Navbar, Sidebar, Modal, Badge)
-        ├── context/AuthContext.jsx          # JWT Authentication Provider
-        ├── pages/                           # 9 Full-featured domain pages
-        └── services/api.js                  # Axios client with JWT interceptor
+│       ├── main/java/com/borrowhub/         # 120 production Java classes
+│       └── test/java/com/borrowhub/         # 5 test suites (26 automated tests)
+│
+└── borrowhub-frontend/                      # React 19 / Vite 8 Frontend
+    ├── package.json                         # Node dependencies & npm scripts
+    ├── Dockerfile                           # Multi-stage Nginx container image
+    ├── e2e/                                 # Playwright E2E & Axe-Core test specs (13 tests)
+    └── src/                                 # 27 component, context & page modules
 ```
 
 ---
