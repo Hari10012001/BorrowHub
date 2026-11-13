@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   servlet:
     context-path: /
 
@@ -10,15 +10,15 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:borrowhub_db}?serverTimezone=%2B05:30&connectionTimeZone=%2B05:30&forceConnectionTimeZoneToSession=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:borrowhub_user}
-    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:mysql://${DB_HOST:${MYSQL_HOST:localhost}}:${DB_PORT:${MYSQL_PORT:3306}}/${DB_NAME:${MYSQL_DATABASE:borrowhub_db}}?serverTimezone=%2B05:30&connectionTimeZone=%2B05:30&forceConnectionTimeZoneToSession=true&useSSL=false&allowPublicKeyRetrieval=true}}
+    username: ${DB_USERNAME:${MYSQL_USER:borrowhub_user}}
+    password: ${DB_PASSWORD:${MYSQL_PASSWORD:}}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       pool-name: BorrowHubHikariPool
       maximum-pool-size: 20
       minimum-idle: 5
-      connection-timeout: 10000
+      connection-timeout: 30000
       idle-timeout: 300000
       max-lifetime: 1800000
       connection-init-sql: SET time_zone = '+05:30'
@@ -51,7 +51,7 @@ spring:
 
 borrowhub:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   upload:
     dir: ${FILE_UPLOAD_DIR:./uploads}

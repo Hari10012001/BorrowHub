@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+const resolveBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  if (typeof window !== 'undefined' && window.__BORROWHUB_CONFIG__?.API_BASE_URL) {
+    return window.__BORROWHUB_CONFIG__.API_BASE_URL;
+  }
+  return '/api';
+};
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: resolveBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

@@ -17,6 +17,6 @@ USER borrowhub
 
 COPY --from=builder /build/target/borrowhub-backend-1.0.0.jar /app/borrowhub-backend.jar
 
-EXPOSE 8080
+EXPOSE 8080 80
 
 ENTRYPOINT ["java", "-Duser.timezone=Asia/Kolkata", "-jar", "/app/borrowhub-backend.jar"]
