@@ -1,6 +1,20 @@
 # BorrowHub Automated Application-Level Security Scanner
 $ErrorActionPreference = "Continue"
 
+# Load environment configuration from .env if present
+$envFile = Join-Path $PSScriptRoot "..\..\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object { $_ -and -not $_.StartsWith('#') -and $_.Contains('=') } | ForEach-Object {
+        $parts = $_.Split('=', 2)
+        $k = $parts[0].Trim()
+        $v = $parts[1].Trim()
+        [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+        Set-Item "env:$k" $v
+    }
+}
+$studentPassword = if ($env:BORROWHUB_SEED_STUDENT_PASSWORD) { $env:BORROWHUB_SEED_STUDENT_PASSWORD } else { "Student@123" }
+$dbPassword = if ($env:DB_PASSWORD) { $env:DB_PASSWORD } else { "BorrowHub@2026" }
+
 Write-Host "============================================================================" -ForegroundColor Cyan
 Write-Host " [BorrowHub] Executing Automated Application Security Scan" -ForegroundColor Cyan
 Write-Host "============================================================================" -ForegroundColor Cyan
@@ -75,7 +89,7 @@ try {
 
 # 3. Credential Leakage in Profile API
 try {
-    $body = @{ username = "student1"; password = "Student@123" } | ConvertTo-Json
+    $body = @{ username = "student1"; password = $studentPassword } | ConvertTo-Json
     $loginResp = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     $token = $loginResp.data.token
 
@@ -95,10 +109,10 @@ try {
 # 4. Password Hashing in Database
 try {
     $mysqlExe = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
-    $env:MYSQL_PWD = "BorrowHub@2026"
-    $sampleHash = (& $mysqlExe -u borrowhub_user -h localhost -P 3306 -s -N -e "SELECT password_hash FROM borrowhub_db.users WHERE username='admin' LIMIT 1;" 2>$null)
-    if ($sampleHash -like "$2a$*" -or $sampleHash -like "$2b$*") {
-        Add-Finding "Low" "Password Storage Security" "BCrypt adaptive salt and hashing algorithm verified ($sampleHash)" "PASSED"
+    $rawOutput = (& $mysqlExe -u borrowhub_user --password=$dbPassword -h 127.0.0.1 -P 3306 -s -N -e "SELECT password_hash FROM borrowhub_db.users WHERE username='admin' LIMIT 1;" 2>&1)
+    $sampleHash = ($rawOutput | Where-Object { $_ -match '^\$2[ab]\$' })
+    if ($sampleHash) {
+        Add-Finding "Low" "Password Storage Security" "BCrypt adaptive salt and hashing algorithm verified" "PASSED"
     } else {
         Add-Finding "Critical" "Password Storage Security" "Passwords appear to be stored unhashed or weakly hashed" "VULNERABLE"
     }

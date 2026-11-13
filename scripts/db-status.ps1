@@ -1,6 +1,18 @@
 # BorrowHub Database Status Checker (PowerShell Helper)
 $ErrorActionPreference = "SilentlyContinue"
 
+# Load environment configuration from .env if present
+$envFile = Join-Path $PSScriptRoot "..\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object { $_ -and -not $_.StartsWith('#') -and $_.Contains('=') } | ForEach-Object {
+        $parts = $_.Split('=', 2)
+        $k = $parts[0].Trim()
+        $v = $parts[1].Trim()
+        [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+        Set-Item "env:$k" $v
+    }
+}
+
 $mysqlExe = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
 if (-not (Test-Path $mysqlExe)) {
     $cmd = Get-Command mysql -ErrorAction SilentlyContinue
@@ -8,7 +20,7 @@ if (-not (Test-Path $mysqlExe)) {
 }
 
 $dbUser = if ($env:DB_USERNAME) { $env:DB_USERNAME } else { "borrowhub_user" }
-$dbPass = if ($env:DB_PASSWORD) { $env:DB_PASSWORD } else { "BorrowHub@2026" }
+$dbPass = $env:DB_PASSWORD
 $dbName = if ($env:DB_NAME) { $env:DB_NAME } else { "borrowhub_db" }
 $dbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "localhost" }
 $dbPort = if ($env:DB_PORT) { $env:DB_PORT } else { "3306" }

@@ -30,13 +30,40 @@ if not defined DB_PASSWORD (
     pause
     exit /b 1
 )
+if "!DB_PASSWORD:~0,13!"=="replace-with-" (
+    echo [BorrowHub ERROR] DB_PASSWORD in .env still contains placeholder value. Please set a real password.
+    pause
+    exit /b 1
+)
+
 if not defined JWT_SECRET (
     echo [BorrowHub ERROR] JWT_SECRET is missing from .env.
     pause
     exit /b 1
 )
+if "!JWT_SECRET:~0,8!"=="generate" (
+    echo [BorrowHub ERROR] JWT_SECRET in .env still contains placeholder value. Please generate a unique secret.
+    pause
+    exit /b 1
+)
+
 if not defined BORROWHUB_SEED_ADMIN_PASSWORD (
-    echo [BorrowHub ERROR] Seed passwords are missing from .env.
+    echo [BorrowHub ERROR] BORROWHUB_SEED_ADMIN_PASSWORD is missing from .env.
+    pause
+    exit /b 1
+)
+if not defined BORROWHUB_SEED_FACULTY_PASSWORD (
+    echo [BorrowHub ERROR] BORROWHUB_SEED_FACULTY_PASSWORD is missing from .env.
+    pause
+    exit /b 1
+)
+if not defined BORROWHUB_SEED_STAFF_PASSWORD (
+    echo [BorrowHub ERROR] BORROWHUB_SEED_STAFF_PASSWORD is missing from .env.
+    pause
+    exit /b 1
+)
+if not defined BORROWHUB_SEED_STUDENT_PASSWORD (
+    echo [BorrowHub ERROR] BORROWHUB_SEED_STUDENT_PASSWORD is missing from .env.
     pause
     exit /b 1
 )

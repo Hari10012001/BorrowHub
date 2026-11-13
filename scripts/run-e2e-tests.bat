@@ -37,9 +37,9 @@ cd /d "%PROJECT_ROOT%"
 
 echo ============================================================================
 if %E2E_EXIT_CODE% EQU 0 (
-    echo [BorrowHub RESULT] PLAYWRIGHT E2E TESTS: PASSED (ALL USER JOURNEYS GREEN)
+    echo [BorrowHub RESULT] PLAYWRIGHT E2E TESTS: PASSED - ALL USER JOURNEYS GREEN
 ) else (
-    echo [BorrowHub RESULT] PLAYWRIGHT E2E TESTS: FAILED (EXIT CODE: %E2E_EXIT_CODE%)
+    echo [BorrowHub RESULT] PLAYWRIGHT E2E TESTS: FAILED - EXIT CODE: %E2E_EXIT_CODE%
 )
 echo ============================================================================
 exit /b %E2E_EXIT_CODE%

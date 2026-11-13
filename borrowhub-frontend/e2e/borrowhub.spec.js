@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+const SEED_STUDENT_PW = process.env.BORROWHUB_SEED_STUDENT_PASSWORD || 'Student@123';
+const SEED_ADMIN_PW = process.env.BORROWHUB_SEED_ADMIN_PASSWORD || 'Admin@123';
+
 test.describe('BorrowHub End-to-End User Journeys', () => {
 
   test('1. Authentication Flow - Student Login and Navigation', async ({ page }) => {
@@ -9,7 +12,7 @@ test.describe('BorrowHub End-to-End User Journeys', () => {
 
     // Fill credentials for student1
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
 
     // Verify redirected to catalog
@@ -35,7 +38,7 @@ test.describe('BorrowHub End-to-End User Journeys', () => {
     // Login as student
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
 
@@ -52,7 +55,7 @@ test.describe('BorrowHub End-to-End User Journeys', () => {
     // Login as student
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
 
@@ -65,7 +68,7 @@ test.describe('BorrowHub End-to-End User Journeys', () => {
   test('5. Admin Journey - Admin Login & Circulation Desk Access', async ({ page }) => {
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('admin');
-    await page.locator('input[type="password"]').fill('Admin@123');
+    await page.locator('input[type="password"]').fill(SEED_ADMIN_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
 
@@ -78,7 +81,7 @@ test.describe('BorrowHub End-to-End User Journeys', () => {
   test('6. User Logout Journey', async ({ page }) => {
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
 

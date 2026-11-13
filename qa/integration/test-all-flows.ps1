@@ -3,6 +3,21 @@ param(
     [string]$BaseUrl = "http://localhost:8080"
 )
 
+# Load environment configuration from .env if present
+$envFile = Join-Path $PSScriptRoot "..\..\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object { $_ -and -not $_.StartsWith('#') -and $_.Contains('=') } | ForEach-Object {
+        $parts = $_.Split('=', 2)
+        $k = $parts[0].Trim()
+        $v = $parts[1].Trim()
+        [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+        Set-Item "env:$k" $v
+    }
+}
+$studentPassword = if ($env:BORROWHUB_SEED_STUDENT_PASSWORD) { $env:BORROWHUB_SEED_STUDENT_PASSWORD } else { "Student@123" }
+$facultyPassword = if ($env:BORROWHUB_SEED_FACULTY_PASSWORD) { $env:BORROWHUB_SEED_FACULTY_PASSWORD } else { "Faculty@123" }
+$adminPassword = if ($env:BORROWHUB_SEED_ADMIN_PASSWORD) { $env:BORROWHUB_SEED_ADMIN_PASSWORD } else { "Admin@123" }
+
 $ErrorActionPreference = "Stop"
 Write-Host "============================================================================" -ForegroundColor Cyan
 Write-Host " [BorrowHub] Executing Comprehensive Functional & State Machine Verification" -ForegroundColor Cyan
@@ -37,7 +52,7 @@ Write-Host "Baseline Resource 6 (Raspberry Pi) Available Stock: $initialRpiAvail
 # 1. Student Authentication
 # --------------------------------------------------------------------------
 $studentAuth = Step "1. Student Authentication" {
-    $body = @{ username = "student1"; password = "Student@123" } | ConvertTo-Json
+    $body = @{ username = "student1"; password = $studentPassword } | ConvertTo-Json
     $r = Invoke-RestMethod -Uri "$BaseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     if (-not $r.success -or -not $r.data.token) { throw "Login failed" }
     
@@ -52,7 +67,7 @@ $studentId = $studentAuth.id
 # 2. Faculty Authentication
 # --------------------------------------------------------------------------
 $facultyToken = Step "2. Faculty Authentication" {
-    $body = @{ username = "faculty1"; password = "Faculty@123" } | ConvertTo-Json
+    $body = @{ username = "faculty1"; password = $facultyPassword } | ConvertTo-Json
     $r = Invoke-RestMethod -Uri "$BaseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     if (-not $r.success -or $r.data.role -ne "FACULTY") { throw "Faculty login failed" }
     return $r.data.token
@@ -62,7 +77,7 @@ $facultyToken = Step "2. Faculty Authentication" {
 # 3. Admin Authentication
 # --------------------------------------------------------------------------
 $adminToken = Step "3. Admin Authentication" {
-    $body = @{ username = "admin"; password = "Admin@123" } | ConvertTo-Json
+    $body = @{ username = "admin"; password = $adminPassword } | ConvertTo-Json
     $r = Invoke-RestMethod -Uri "$BaseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     if (-not $r.success -or $r.data.role -ne "ADMIN") { throw "Admin login failed" }
     return $r.data.token

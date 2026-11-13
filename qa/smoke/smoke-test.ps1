@@ -1,6 +1,20 @@
 # BorrowHub Automated Smoke Test Suite
 $ErrorActionPreference = "Continue"
 
+# Load environment configuration from .env if present
+$envFile = Join-Path $PSScriptRoot "..\..\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object { $_ -and -not $_.StartsWith('#') -and $_.Contains('=') } | ForEach-Object {
+        $parts = $_.Split('=', 2)
+        $k = $parts[0].Trim()
+        $v = $parts[1].Trim()
+        [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+        Set-Item "env:$k" $v
+    }
+}
+$studentPassword = if ($env:BORROWHUB_SEED_STUDENT_PASSWORD) { $env:BORROWHUB_SEED_STUDENT_PASSWORD } else { "Student@123" }
+$adminPassword = if ($env:BORROWHUB_SEED_ADMIN_PASSWORD) { $env:BORROWHUB_SEED_ADMIN_PASSWORD } else { "Admin@123" }
+
 Write-Host "============================================================================" -ForegroundColor Cyan
 Write-Host " [BorrowHub] Executing Live Smoke Test Suite against Running Services" -ForegroundColor Cyan
 Write-Host "============================================================================" -ForegroundColor Cyan
@@ -58,7 +72,7 @@ Run-SmokeTest "Categories API (/api/categories)" {
 # 5. Student Authentication
 $global:studentToken = $null
 Run-SmokeTest "Student Authentication (/api/auth/login)" {
-    $body = @{ username = "student1"; password = "Student@123" } | ConvertTo-Json
+    $body = @{ username = "student1"; password = $studentPassword } | ConvertTo-Json
     $resp = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     if ($resp.success -eq $true -and $resp.data.token) {
         $global:studentToken = $resp.data.token
@@ -77,7 +91,7 @@ Run-SmokeTest "Authenticated User Profile (/api/auth/me)" {
 # 7. Admin Authentication
 $global:adminToken = $null
 Run-SmokeTest "Admin Authentication (/api/auth/login)" {
-    $body = @{ username = "admin"; password = "Admin@123" } | ConvertTo-Json
+    $body = @{ username = "admin"; password = $adminPassword } | ConvertTo-Json
     $resp = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Body $body -ContentType "application/json"
     if ($resp.success -eq $true -and $resp.data.token) {
         $global:adminToken = $resp.data.token

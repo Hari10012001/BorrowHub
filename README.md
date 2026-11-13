@@ -183,55 +183,61 @@ Managed under Flyway migration `V1__initial_schema.sql`:
 
 ---
 
-## 6. Local Test Accounts
+## 6. Local Environment Configuration & Seed Accounts
 
-The project may initialize local test users through its database seed configuration. Treat all seeded accounts as development-only. Set or rotate passwords locally before demonstrations, never reuse them in shared environments, and do not publish reusable credentials in documentation.
+BorrowHub requires local environment configuration before running. The repository provides [.env.example](file:///.env.example) as a configuration template.
 
+### Setting Up Local Environment (.env)
+1. Copy [.env.example](file:///.env.example) to `.env`:
+   ```bash
+   copy .env.example .env
+   ```
+2. Open `.env` and configure your unique local parameters:
+   - `DB_PASSWORD`: Set the password for your local MySQL database user (`borrowhub_user`).
+   - `JWT_SECRET`: Generate a cryptographically secure random string of at least 32 bytes (256 bits).
+   - Seed Account Passwords: Set unique passwords for the initial seed accounts:
+     - `BORROWHUB_SEED_ADMIN_PASSWORD` (Administrator account: `admin`)
+     - `BORROWHUB_SEED_FACULTY_PASSWORD` (Faculty account: `faculty1`)
+     - `BORROWHUB_SEED_STAFF_PASSWORD` (Circulation staff account: `staff1`)
+     - `BORROWHUB_SEED_STUDENT_PASSWORD` (Student account: `student1`)
+
+> **Security Guardrail:** The `.env` file is excluded from Git via `.gitignore`. Never commit `.env` or hardcode credentials into source files. All seeded accounts are strictly for local development and demonstration.
 
 ---
 
 ## 7. Verification & Automated Test Results
 
-The backend architecture test suite exercises the full persistence layer against live MySQL 8.0:
+BorrowHub maintains a comprehensive multi-tier quality assurance suite. Results are divided between **GitHub Actions CI** and **Local QA / E2E Verification**:
 
-```
-[INFO] -------------------------------------------------------
-[INFO]  T E S T S
-[INFO] -------------------------------------------------------
-[INFO] Running com.borrowhub.BorrowHubApplicationTests
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 -- in com.borrowhub.BorrowHubApplicationTests
-[INFO] 
-[INFO] Running com.borrowhub.service.CanonicalJsonAndIdempotencyTests
-[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 -- in com.borrowhub.service.CanonicalJsonAndIdempotencyTests
-[INFO] 
-[INFO] Running com.borrowhub.service.CirculationArchitectureTests
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 -- in com.borrowhub.service.CirculationArchitectureTests
-[INFO] 
-[INFO] Results:
-[INFO] 
-[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
-[INFO] 
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-```
+### Distinction: Local QA vs GitHub Actions CI
+- **GitHub Actions CI (`.github/workflows/borrowhub-ci.yml`):**
+  - Executes automatically on `push` and `pull_request` to `main` and `develop`.
+  - Runs in an ephemeral Ubuntu environment with an isolated MySQL 8.0 service container.
+  - Generates unique, per-run credentials for each workflow execution.
+  - Verifies: Backend Maven compile & test suite (25 tests), fat JAR packaging, and Frontend Vitest suite & production build.
+- **Local QA & Verification Suite (`qa/`, `scripts/`):**
+  - Exercises full-stack integration against local MySQL with session timezone `+05:30`.
+  - Runs Windows batch automation scripts, live API journeys, and Playwright Chromium browser tests.
+  - Executes Axe-Core automated WCAG 2.1 AA accessibility audits on live rendered DOMs.
 
-### Verified Test Matrix:
-1. `BorrowHubApplicationTests.contextLoads()`: Verifies complete Spring Boot context boot, HikariCP connection pool, and Flyway migration execution.
-2. `CanonicalJsonAndIdempotencyTests`:
-   - `testCanonicalJsonDeterminism()` (C26): Verifies RFC 8785 JCS key sorting and normalization.
-   - `testSha256FingerprintGeneration()` (C23, C26): Verifies deterministic cryptographic hashing.
-   - `testCrossUserReuseRejected()` (C23): Rejects key theft across users with HTTP 400.
-   - `testPayloadMismatchRejected()` (C23): Rejects payload tampering under same key with HTTP 409.
-   - `testSuccessfulReplay()` (C23): Replays cached database response on identical duplicate request.
-3. `CirculationArchitectureTests`:
-   - `testIndividualAssetActiveCustodyBlocksUnit()` (C12): Active custody blocks individual unit re-loaning.
-   - `testCheckConstraintTerminalConsistency()` (C13): Enforces MySQL `chk_br_terminal_consistency`.
-   - `testStoredGeneratedColumnSync()` (C17): Verifies MySQL `STORED` generated `quantity_outstanding` auto-calculation.
-   - `testReservationExpiryCommitDurable()` (C21): Verifies `REQUIRES_NEW` durable expiry commit.
-   - `testPartialCheckoutRemainderRelease()` (C30, C38): Verifies remainder release and `STOCK_REPLENISHED` event emission.
-   - `testZeroJvmBusinessClock()` (C42): Verifies zero JVM business clock; values populated by MySQL `CURRENT_DATE()`.
-   - `testOutboxJitSingleClaimFencing()` (C47, C48): Verifies JIT single-event claim with `SKIP LOCKED` and fencing verification.
+### Test Inventory & Verification Breakdown
+
+| Test Layer | Test Suite / Script | Count | Scope & Coverage | CI Status | Local Status |
+|---|---|:---:|---|:---:|:---:|
+| **Backend Architecture** | `BorrowHubApplicationTests` | 1 | Spring Boot context boot, JPA mapping, Flyway V1 migration | PASS | PASS |
+| **Backend Idempotency** | `CanonicalJsonAndIdempotencyTests` | 5 | RFC 8785 canonicalization, SHA-256 fingerprinting, replay caching | PASS | PASS |
+| **Backend Circulation** | `CirculationArchitectureTests` | 8 | DAG lock ordering, STORED columns, durable expiry, zero JVM clock | PASS | PASS |
+| **Backend Auth & RBAC** | `AuthControllerTest` | 8 | MockMvc authentication, registration, role privilege escalation | PASS | PASS |
+| **Backend Unit Logic** | `AvailabilityServiceUnitTest` | 4 | Mockito unit verification of stock math, holds, and loan deductions | PASS | PASS |
+| **Frontend Unit** | `AuthContext.test.jsx` | 5 | Vitest: token storage, decoded claims, login/logout context state | PASS | PASS |
+| **Frontend Unit** | `Components.test.jsx` | 4 | Vitest: badge color rendering, modal accessibility, button states | PASS | PASS |
+| **Playwright E2E** | `borrowhub.spec.js` | 6 | Headless browser: student login, search, catalog, RBAC redirect | N/A (Local) | PASS |
+| **Playwright Demo** | `demo.spec.js` | 4 | Live multi-role login, sidebar permissions, console error monitoring | N/A (Local) | PASS |
+| **Accessibility (A11y)** | `accessibility.spec.js` | 3 | Axe-Core WCAG 2.1 AA audit on Login, Catalog, and Borrowings pages | N/A (Local) | PASS |
+| **Live Integration** | `qa/integration/test-all-flows.ps1` | 20 | Complete 8-stage lifecycle: search, request, review, checkout, returns | N/A (Local) | PASS |
+| **Live Smoke API** | `qa/smoke/smoke-test.ps1` | 10 | Actuator health, catalog, categories, auth token, RBAC API guards | N/A (Local) | PASS |
+| **Security Check** | `qa/security/security-check.ps1` | 6 | Escalation rejection, SQLi probe, BCrypt storage check, JWT forgery | N/A (Local) | PASS |
+| **Total Automated Tests** | **All Suites** | **78** | **Comprehensive Multi-Tier Quality & Security Suite** | **34 Passed** | **78 Passed** |
 
 ---
 
@@ -240,48 +246,49 @@ The backend architecture test suite exercises the full persistence layer against
 ### Prerequisites
 - **Java:** JDK 21 LTS installed and on `PATH`.
 - **Maven:** Apache Maven 3.9+ installed and on `PATH`.
-- **Node.js:** Node 18+ and npm installed and on `PATH`.
+- **Node.js:** Node 18+ LTS (Node 20 recommended) and npm installed and on `PATH`.
 - **MySQL:** MySQL 8.0 Server running on port 3306 with timezone `+05:30`.
 
-### Step 1: Start MySQL Database
-Ensure MySQL 8.0 is running on port 3306 with the appropriate timezone:
-```powershell
-& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe" --datadir="C:\Users\Admin\borrowhub_mysql_data" --port=3306 --default-time-zone="+05:30" --console
+### Step 1: Configure Environment (.env)
+```cmd
+copy .env.example .env
 ```
+Edit `.env` to supply your unique local database password, JWT secret, and seed account passwords.
 
-### Step 2: Build & Run Backend
-Navigate to the `borrowhub-backend` directory:
-```powershell
+### Step 2: Start MySQL Database
+Ensure MySQL 8.0 is running on port 3306 with timezone `+05:30` (`Asia/Kolkata`):
+```cmd
+scripts\start-database.bat
+```
+*(Or start your local MySQL service with `--default-time-zone="+05:30"`).*
+
+### Step 3: Launch Full Application (Windows Automation)
+Run the master startup script:
+```cmd
+scripts\start-borrowhub.bat
+```
+This script validates toolchains, checks `.env` configuration, verifies port availability, builds and starts the backend service, verifies `/actuator/health`, launches the frontend development server, and opens your default browser to `http://localhost:5173`.
+
+### Step 4: Manual Startup (Alternative Developer Mode)
+
+**Terminal 1 (Backend):**
+```bash
 cd borrowhub-backend
-
-# Run the test suite
-mvn test
-
-# Package the application
-mvn clean package -DskipTests
-
-# Run the backend application
+mvn clean test
+mvn package -DskipTests
 java -jar target/borrowhub-backend-1.0.0.jar
 ```
-The backend starts on `http://localhost:8080`.
+The backend initializes on `http://localhost:8080`.
 
-### Step 3: Run Frontend Development Server
-In a separate terminal, navigate to `borrowhub-frontend`:
-```powershell
+**Terminal 2 (Frontend):**
+```bash
 cd borrowhub-frontend
-
-# Install dependencies (if not already installed)
 npm install
-
-# Start Vite development server
 npm run dev
 ```
-The frontend UI starts on `http://localhost:5173`.
-
-Alternatively, build and preview the optimized production bundle:
-```powershell
+The frontend UI starts on `http://localhost:5173`. Production build can be verified via:
+```bash
 npm run build
-npm run preview
 ```
 
 ---
@@ -336,7 +343,7 @@ npm run preview
 
 ---
 
-## 10. Architectural Compliance Sign-Off
+## 10. Architectural Compliance & Production Readiness Notice
 
 The platform implementation satisfies all architectural directives:
 - **Zero JVM Business Clock (C42):** 100% verified via `CirculationArchitectureTests.testZeroJvmBusinessClock()`.
@@ -345,4 +352,18 @@ The platform implementation satisfies all architectural directives:
 - **RFC 8785 Canonical JSON & Multi-Tenant Scoping (C23, C26):** Verified via `CanonicalJsonAndIdempotencyTests`.
 - **Durable Expiry & Remainder Release (C21, C30, C38):** Fully verified via dedicated transaction integration tests.
 - **JIT Outbox Leases with Fencing (C47, C48, C49):** Verified via `testOutboxJitSingleClaimFencing()`.
+
+---
+
+### Production Readiness Notice & Scope
+BorrowHub is an academic, demonstration platform designed to showcase architectural patterns for concurrency control, DAG lock hierarchies, database-authoritative clocks, and transactional outbox event streaming.
+
+**Important Operational Notice:**
+- The repository is NOT configured for direct public production deployment without further infrastructure hardening.
+- Production deployment requires:
+  1. Production-grade secrets management (e.g., HashiCorp Vault, AWS Secrets Manager, or Google Secret Manager) instead of local `.env` files.
+  2. TLS/HTTPS termination and an external reverse proxy (e.g., Nginx, Traefik, or Cloudflare).
+  3. Multi-node clustered database provisioning with automated backups and replication.
+  4. Enterprise identity provider integration (SAML/OAuth2/OIDC) and credential rotation policies.
+- Any default credentials or secrets present in historical development commits should be rotated immediately and never reused in any environment.
 

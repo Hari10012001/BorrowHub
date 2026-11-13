@@ -8,10 +8,10 @@
 
 | Test ID | Feature | Preconditions | Steps | Expected Result | Automated Equivalent | Manual Status |
 |---|---|---|---|---|---|---|
-| **AUTH-01** | Student Login | User `student1` exists with password `Student@123` | 1. Navigate to `/login`<br>2. Enter username `student1`<br>3. Enter password `Student@123`<br>4. Click "Sign In" | Redirected to `/catalog`; navbar shows student name and `STUDENT` badge | `Playwright: Test 1` | Verified by E2E |
+| **AUTH-01** | Student Login | User `student1` exists with password set in `BORROWHUB_SEED_STUDENT_PASSWORD` | 1. Navigate to `/login`<br>2. Enter username `student1`<br>3. Enter configured password<br>4. Click "Sign In" | Redirected to `/catalog`; navbar shows student name and `STUDENT` badge | `Playwright: Test 1` | Verified by E2E |
 | **AUTH-02** | Invalid Password Rejection | User `student1` exists | 1. Navigate to `/login`<br>2. Enter invalid password<br>3. Click "Sign In" | Red alert banner displayed: "Invalid credentials"; stays on `/login` | `Playwright: Test 2` | Verified by E2E |
-| **AUTH-03** | Faculty Login | User `faculty1` exists with password `Faculty@123` | 1. Enter credentials for `faculty1`<br>2. Click "Sign In" | Redirected to `/catalog`; navbar displays `FACULTY` badge | `AuthControllerTest` | Verified by Backend |
-| **AUTH-04** | Admin Login | User `admin` exists with password `Admin@123` | 1. Enter credentials for `admin`<br>2. Click "Sign In" | Redirected to `/catalog`; Admin navigation links visible (`Circulation Desk`, `Pending Approvals`) | `Playwright: Test 5` | Verified by E2E |
+| **AUTH-03** | Faculty Login | User `faculty1` exists with password set in `BORROWHUB_SEED_FACULTY_PASSWORD` | 1. Enter credentials for `faculty1`<br>2. Click "Sign In" | Redirected to `/catalog`; navbar displays `FACULTY` badge | `AuthControllerTest` | Verified by Backend |
+| **AUTH-04** | Admin Login | User `admin` exists with password set in `BORROWHUB_SEED_ADMIN_PASSWORD` | 1. Enter credentials for `admin`<br>2. Click "Sign In" | Redirected to `/catalog`; Admin navigation links visible (`Circulation Desk`, `Pending Approvals`) | `Playwright: Test 5` | Verified by E2E |
 | **AUTH-05** | User Logout | User is logged in | 1. Click "Logout" button in navigation bar | Session token cleared from storage; redirected to `/login` | `Playwright: Test 6` | Verified by E2E |
 | **AUTH-06** | Student Self-Registration | Email and username not previously registered | 1. Navigate to `/register`<br>2. Fill in registration form<br>3. Submit | Success alert displayed; user redirected to `/login`; record created in `users` | `AuthControllerTest` | Verified by Backend |
 

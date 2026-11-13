@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { Package2, Lock, User, ArrowRight, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 
 export const LoginPage = () => {
-  const [username, setUsername] = useState('student1');
-  const [password, setPassword] = useState('Student@123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
@@ -93,40 +93,40 @@ export const LoginPage = () => {
         <div className="pt-2 border-t border-slate-100">
           <div className="flex items-center gap-1.5 mb-2.5">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span className="text-xs font-semibold text-slate-700">Quick Demo Accounts (1-Click Fill)</span>
+            <span className="text-xs font-semibold text-slate-700">Quick Account Selector (Fills Username)</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
               type="button"
-              onClick={() => setDemoAccount('admin', 'Admin@123')}
+              onClick={() => setDemoAccount('admin', '')}
               className="p-2 rounded-lg bg-slate-50 hover:bg-blue-50 hover:border-blue-200 border border-slate-200 text-left transition"
             >
               <div className="font-bold text-slate-800">Admin</div>
-              <div className="text-[10px] text-slate-500">Full Catalog & Control</div>
+              <div className="text-[10px] text-slate-500">Username: admin</div>
             </button>
             <button
               type="button"
-              onClick={() => setDemoAccount('faculty1', 'Faculty@123')}
+              onClick={() => setDemoAccount('faculty1', '')}
               className="p-2 rounded-lg bg-slate-50 hover:bg-amber-50 hover:border-amber-200 border border-slate-200 text-left transition"
             >
               <div className="font-bold text-slate-800">Faculty</div>
-              <div className="text-[10px] text-slate-500">Tier 1 Priority & Desk</div>
+              <div className="text-[10px] text-slate-500">Username: faculty1</div>
             </button>
             <button
               type="button"
-              onClick={() => setDemoAccount('staff1', 'Staff@123')}
+              onClick={() => setDemoAccount('staff1', '')}
               className="p-2 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 text-left transition"
             >
               <div className="font-bold text-slate-800">Circulation Staff</div>
-              <div className="text-[10px] text-slate-500">Checkout & Returns</div>
+              <div className="text-[10px] text-slate-500">Username: staff1</div>
             </button>
             <button
               type="button"
-              onClick={() => setDemoAccount('student1', 'Student@123')}
+              onClick={() => setDemoAccount('student1', '')}
               className="p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 border border-slate-200 text-left transition"
             >
               <div className="font-bold text-slate-800">Student</div>
-              <div className="text-[10px] text-slate-500">Borrow & Reserve</div>
+              <div className="text-[10px] text-slate-500">Username: student1</div>
             </button>
           </div>
         </div>

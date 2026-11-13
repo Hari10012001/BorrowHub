@@ -12,6 +12,7 @@ import com.borrowhub.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +30,20 @@ public class DataInitializer implements CommandLineRunner {
     private final ResourceRepository resourceRepository;
     private final ResourceUnitRepository resourceUnitRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Environment environment;
 
     public DataInitializer(UserRepository userRepository,
                            CategoryRepository categoryRepository,
                            ResourceRepository resourceRepository,
                            ResourceUnitRepository resourceUnitRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           Environment environment) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.resourceRepository = resourceRepository;
         this.resourceUnitRepository = resourceUnitRepository;
         this.passwordEncoder = passwordEncoder;
+        this.environment = environment;
     }
 
     @Override
@@ -55,12 +59,18 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        logger.info("Seeding default users...");
+        // Validate all required seed passwords upfront before user creation
+        String adminPassword = requiredSeedPassword("BORROWHUB_SEED_ADMIN_PASSWORD");
+        String facultyPassword = requiredSeedPassword("BORROWHUB_SEED_FACULTY_PASSWORD");
+        String staffPassword = requiredSeedPassword("BORROWHUB_SEED_STAFF_PASSWORD");
+        String studentPassword = requiredSeedPassword("BORROWHUB_SEED_STUDENT_PASSWORD");
+
+        logger.info("Seeding default users with validated environment credentials...");
 
         User admin = new User();
         admin.setUsername("admin");
         admin.setEmail("admin@borrowhub.edu");
-        admin.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_ADMIN_PASSWORD")));
+        admin.setPasswordHash(passwordEncoder.encode(adminPassword));
         admin.setFirstName("Platform");
         admin.setLastName("Administrator");
         admin.setRole(Role.ADMIN);
@@ -72,7 +82,7 @@ public class DataInitializer implements CommandLineRunner {
         User faculty = new User();
         faculty.setUsername("faculty1");
         faculty.setEmail("faculty1@borrowhub.edu");
-        faculty.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_FACULTY_PASSWORD")));
+        faculty.setPasswordHash(passwordEncoder.encode(facultyPassword));
         faculty.setFirstName("Robert");
         faculty.setLastName("Vance");
         faculty.setRole(Role.FACULTY);
@@ -84,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
         User staff = new User();
         staff.setUsername("staff1");
         staff.setEmail("staff1@borrowhub.edu");
-        staff.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_STAFF_PASSWORD")));
+        staff.setPasswordHash(passwordEncoder.encode(staffPassword));
         staff.setFirstName("Sarah");
         staff.setLastName("Jenkins");
         staff.setRole(Role.ADMIN);
@@ -96,7 +106,7 @@ public class DataInitializer implements CommandLineRunner {
         User student = new User();
         student.setUsername("student1");
         student.setEmail("student1@borrowhub.edu");
-        student.setPasswordHash(passwordEncoder.encode(requiredSeedPassword("BORROWHUB_SEED_STUDENT_PASSWORD")));
+        student.setPasswordHash(passwordEncoder.encode(studentPassword));
         student.setFirstName("Alexander");
         student.setLastName("Hayes");
         student.setRole(Role.STUDENT);
@@ -109,9 +119,11 @@ public class DataInitializer implements CommandLineRunner {
         logger.info("Default users seeded: admin, faculty1, staff1, student1.");
     }
 
-
     private String requiredSeedPassword(String variableName) {
-        String value = System.getenv(variableName);
+        String value = environment != null ? environment.getProperty(variableName) : null;
+        if (value == null || value.isBlank()) {
+            value = System.getenv(variableName);
+        }
         if (value == null || value.isBlank() || value.startsWith("replace-with-")) {
             throw new IllegalStateException("Set a unique local value for environment variable: " + variableName);
         }

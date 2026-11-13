@@ -1,6 +1,19 @@
 # BorrowHub Rigorous Performance & Latency Benchmark with Statistical Percentiles
 $ErrorActionPreference = "Continue"
 
+# Load environment configuration from .env if present
+$envFile = Join-Path $PSScriptRoot "..\..\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object { $_ -and -not $_.StartsWith('#') -and $_.Contains('=') } | ForEach-Object {
+        $parts = $_.Split('=', 2)
+        $k = $parts[0].Trim()
+        $v = $parts[1].Trim()
+        [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+        Set-Item "env:$k" $v
+    }
+}
+$studentPassword = if ($env:BORROWHUB_SEED_STUDENT_PASSWORD) { $env:BORROWHUB_SEED_STUDENT_PASSWORD } else { "Student@123" }
+
 Write-Host "============================================================================" -ForegroundColor Cyan
 Write-Host " [BorrowHub] Executing Performance & Latency Statistical Benchmark" -ForegroundColor Cyan
 Write-Host "============================================================================" -ForegroundColor Cyan
@@ -81,7 +94,7 @@ Measure-Endpoint "Public Resource Catalog" "$baseUrl/api/resources" @{} 50
 Measure-Endpoint "Category Hierarchy" "$baseUrl/api/categories" @{} 50
 
 # 4. Authenticated profile latency
-$loginBody = @{ username = "student1"; password = "Student@123" } | ConvertTo-Json
+$loginBody = @{ username = "student1"; password = $studentPassword } | ConvertTo-Json
 $loginResp = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Body $loginBody -ContentType "application/json"
 $token = $loginResp.data.token
 $authHeaders = @{ Authorization = "Bearer $token" }

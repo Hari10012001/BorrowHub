@@ -43,6 +43,10 @@ jobs:
           DB_USERNAME: borrowhub_user
           DB_PASSWORD: ${{ format('ci-only-{0}-db-password', github.run_id) }}
           JWT_SECRET: ${{ format('ci-only-{0}-not-for-production-signing-key', github.run_id) }}
+          BORROWHUB_SEED_ADMIN_PASSWORD: ${{ format('ci-only-{0}-admin-pass', github.run_id) }}
+          BORROWHUB_SEED_FACULTY_PASSWORD: ${{ format('ci-only-{0}-faculty-pass', github.run_id) }}
+          BORROWHUB_SEED_STAFF_PASSWORD: ${{ format('ci-only-{0}-staff-pass', github.run_id) }}
+          BORROWHUB_SEED_STUDENT_PASSWORD: ${{ format('ci-only-{0}-student-pass', github.run_id) }}
         run: mvn clean test
 
       - name: Package Executable Fat JAR

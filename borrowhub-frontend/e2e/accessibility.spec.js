@@ -3,6 +3,8 @@ import AxeBuilder from '@axe-core/playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const SEED_STUDENT_PW = process.env.BORROWHUB_SEED_STUDENT_PASSWORD || 'Student@123';
+
 test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
   const auditResults = {};
 
@@ -55,7 +57,7 @@ test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
   test('2. Axe-Core Accessibility Audit: Resource Catalog Page (Authenticated)', async ({ page }) => {
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
     await page.waitForLoadState('networkidle');
@@ -103,7 +105,7 @@ test.describe('Automated WCAG Accessibility Audit (Axe-Core)', () => {
   test('3. Axe-Core Accessibility Audit: Student Borrowings Page', async ({ page }) => {
     await page.goto('/login');
     await page.locator('input[type="text"]').fill('student1');
-    await page.locator('input[type="password"]').fill('Student@123');
+    await page.locator('input[type="password"]').fill(SEED_STUDENT_PW);
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/catalog');
 

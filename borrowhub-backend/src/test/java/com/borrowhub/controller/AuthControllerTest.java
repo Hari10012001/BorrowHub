@@ -32,9 +32,14 @@ class AuthControllerTest {
     @Test
     @DisplayName("Should successfully authenticate valid student credentials and return JWT")
     void testValidStudentLogin() throws Exception {
+        String studentPassword = System.getenv("BORROWHUB_SEED_STUDENT_PASSWORD");
+        if (studentPassword == null || studentPassword.isBlank()) {
+            studentPassword = "Student@123";
+        }
+
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("student1");
-        loginRequest.setPassword("Student@123");
+        loginRequest.setPassword(studentPassword);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -33,9 +33,9 @@ cd /d "%PROJECT_ROOT%"
 
 echo ============================================================================
 if %BUILD_EXIT_CODE% EQU 0 (
-    echo [BorrowHub RESULT] FRONTEND TESTS AND BUILD: PASSED (100%% SUCCESS)
+    echo [BorrowHub RESULT] FRONTEND TESTS AND BUILD: PASSED - 100%% SUCCESS
 ) else (
-    echo [BorrowHub RESULT] FRONTEND BUILD: FAILED (EXIT CODE: %BUILD_EXIT_CODE%)
+    echo [BorrowHub RESULT] FRONTEND BUILD: FAILED - EXIT CODE: %BUILD_EXIT_CODE%
 )
 echo ============================================================================
 exit /b %BUILD_EXIT_CODE%
