@@ -8,6 +8,25 @@ REM ============================================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "PROJECT_ROOT=%%~fI"
 
+if not exist "%PROJECT_ROOT%\.env" (
+    echo [BorrowHub ERROR] Missing .env. Copy .env.example to .env and configure local values.
+    exit /b 1
+)
+for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%PROJECT_ROOT%\.env") do if not "%%A"=="" set "%%A=%%B"
+
+if not defined DB_PASSWORD (
+    echo [BorrowHub ERROR] DB_PASSWORD is missing from .env.
+    exit /b 1
+)
+if not defined JWT_SECRET (
+    echo [BorrowHub ERROR] JWT_SECRET is missing from .env.
+    exit /b 1
+)
+if not defined BORROWHUB_SEED_ADMIN_PASSWORD (
+    echo [BorrowHub ERROR] Seed passwords are missing from .env.
+    exit /b 1
+)
+
 echo ============================================================================
 echo [BorrowHub] Executing Spring Boot Backend Test Suites (JUnit 5 / AssertJ)
 echo ============================================================================
