@@ -44,7 +44,7 @@ public class DatabaseConfig {
         config.setMaxLifetime(1800000);
         config.setConnectionInitSql("SET time_zone = '+05:30'");
 
-        String rawUrl = resolveFirstNonEmpty(env, "DATABASE_URL", "MYSQL_URL", "SPRING_DATASOURCE_URL");
+        String rawUrl = resolveFirstNonEmpty(env, "DATABASE_URL", "MYSQL_URL", "SPRING_DATASOURCE_URL", "spring.datasource.url");
 
         if (rawUrl != null && (rawUrl.startsWith("mysql://") || rawUrl.startsWith("mysql2://"))) {
             configureFromCloudUri(config, rawUrl);
@@ -81,6 +81,10 @@ public class DatabaseConfig {
             }
 
             String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?" + DEFAULT_TIMEZONE_PARAMS;
+            String query = uri.getQuery();
+            if (query != null && !query.isBlank()) {
+                jdbcUrl += "&" + query;
+            }
 
             config.setJdbcUrl(jdbcUrl);
             config.setUsername(username);

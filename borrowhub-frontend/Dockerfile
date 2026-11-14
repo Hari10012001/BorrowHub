@@ -28,6 +28,14 @@ RUN printf 'server {\n\
     }\n\
 }\n' > /etc/nginx/conf.d/default.conf
 
+# Inject runtime VITE_API_BASE_URL into config.js via official Nginx entrypoint hook
+RUN printf '#!/bin/sh\n\
+if [ -n "$VITE_API_BASE_URL" ] || [ -n "$API_BASE_URL" ]; then\n\
+  TARGET_URL="${VITE_API_BASE_URL:-$API_BASE_URL}"\n\
+  echo "window.__BORROWHUB_CONFIG__ = { API_BASE_URL: \\x27$TARGET_URL\\x27 };" > /usr/share/nginx/html/config.js\n\
+fi\n' > /docker-entrypoint.d/99-borrowhub-config.sh && \
+    chmod +x /docker-entrypoint.d/99-borrowhub-config.sh
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
