@@ -120,7 +120,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*")); // Allow local development
+        List<String> origins = (allowedOrigins != null && !allowedOrigins.isEmpty()) ? allowedOrigins : List.of("*");
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Idempotency-Key", "X-Requested-With", "Accept"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Idempotency-Key"));

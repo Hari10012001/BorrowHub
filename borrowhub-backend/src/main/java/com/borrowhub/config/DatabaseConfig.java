@@ -19,9 +19,11 @@ import java.nio.charset.StandardCharsets;
  * Automatically handles:
  * 1. Cloud PaaS DATABASE_URL / MYSQL_URL (mysql://user:pass@host:port/db) by converting to JDBC format.
  * 2. JDBC format DATABASE_URL / SPRING_DATASOURCE_URL (jdbc:mysql://...).
- * 3. Individual environment variables (DB_HOST / MYSQL_HOST, DB_PORT / MYSQL_PORT, DB_NAME / MYSQL_DATABASE,
- *    DB_USERNAME / MYSQL_USER, DB_PASSWORD / MYSQL_PASSWORD).
+ * 3. Individual environment variables (DB_HOST / MYSQL_HOST, DB_PORT / MYSQL_PORT,
+ *    DB_DATABASE / DB_NAME / MYSQL_DATABASE, DB_USERNAME / MYSQL_USER, DB_PASSWORD / MYSQL_PASSWORD).
  * 4. Required Asia/Kolkata (+05:30) timezone enforcement and UTF-8 encoding.
+ * 5. Single URL decoding of raw credentials to prevent double-decoding issues.
+ * 6. Zero credential exposure in application logs.
  */
 @Configuration
 public class DatabaseConfig {
@@ -67,34 +69,61 @@ public class DatabaseConfig {
             String path = uri.getPath();
             String dbName = (path != null && path.length() > 1) ? path.substring(1) : "borrowhub_db";
 
-            String userInfo = uri.getUserInfo();
+            String rawUserInfo = uri.getRawUserInfo();
             String username = "borrowhub_user";
             String password = "";
-            if (userInfo != null) {
-                int colonIdx = userInfo.indexOf(':');
+            if (rawUserInfo != null && !rawUserInfo.isBlank()) {
+                int colonIdx = rawUserInfo.indexOf(':');
                 if (colonIdx >= 0) {
-                    username = URLDecoder.decode(userInfo.substring(0, colonIdx), StandardCharsets.UTF_8);
-                    password = URLDecoder.decode(userInfo.substring(colonIdx + 1), StandardCharsets.UTF_8);
+                    username = URLDecoder.decode(rawUserInfo.substring(0, colonIdx), StandardCharsets.UTF_8);
+                    password = URLDecoder.decode(rawUserInfo.substring(colonIdx + 1), StandardCharsets.UTF_8);
                 } else {
-                    username = URLDecoder.decode(userInfo, StandardCharsets.UTF_8);
+                    username = URLDecoder.decode(rawUserInfo, StandardCharsets.UTF_8);
                 }
             }
 
-            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?" + DEFAULT_TIMEZONE_PARAMS;
-            String query = uri.getQuery();
-            if (query != null && !query.isBlank()) {
-                jdbcUrl += "&" + query;
+            StringBuilder jdbcUrl = new StringBuilder("jdbc:mysql://")
+                    .append(host)
+                    .append(":")
+                    .append(port)
+                    .append("/")
+                    .append(dbName)
+                    .append("?");
+
+            String rawQuery = uri.getRawQuery();
+            if (rawQuery == null || rawQuery.isBlank()) {
+                jdbcUrl.append(DEFAULT_TIMEZONE_PARAMS);
+            } else {
+                StringBuilder params = new StringBuilder();
+                if (!rawQuery.contains("serverTimezone")) {
+                    params.append("serverTimezone=%2B05:30&connectionTimeZone=%2B05:30&forceConnectionTimeZoneToSession=true");
+                }
+                if (!rawQuery.contains("useSSL")) {
+                    if (params.length() > 0) params.append("&");
+                    params.append("useSSL=false");
+                }
+                if (!rawQuery.contains("allowPublicKeyRetrieval")) {
+                    if (params.length() > 0) params.append("&");
+                    params.append("allowPublicKeyRetrieval=true");
+                }
+
+                if (params.length() > 0) {
+                    jdbcUrl.append(params).append("&").append(rawQuery);
+                } else {
+                    jdbcUrl.append(rawQuery);
+                }
             }
 
-            config.setJdbcUrl(jdbcUrl);
+            config.setJdbcUrl(jdbcUrl.toString());
             config.setUsername(username);
             config.setPassword(password);
 
             logger.info("DataSource configured successfully for host: {}, port: {}, database: {}, username: {}",
                     host, port, dbName, username);
         } catch (Exception e) {
-            logger.error("Failed to parse cloud database URI. Falling back to default configuration.", e);
-            throw new IllegalStateException("Invalid DATABASE_URL format: " + e.getMessage(), e);
+            // Never log raw database credentials or URLs
+            logger.error("Failed to parse cloud database URI. Please check DATABASE_URL format.");
+            throw new IllegalStateException("Invalid DATABASE_URL format. Please check database connection settings.");
         }
     }
 
@@ -129,7 +158,7 @@ public class DatabaseConfig {
             } catch (NumberFormatException ignored) {}
         }
 
-        String dbName = resolveFirstNonEmpty(env, "DB_NAME", "MYSQL_DATABASE");
+        String dbName = resolveFirstNonEmpty(env, "DB_DATABASE", "DB_NAME", "MYSQL_DATABASE");
         if (dbName == null || dbName.isBlank()) dbName = "borrowhub_db";
 
         String username = resolveFirstNonEmpty(env, "DB_USERNAME", "MYSQL_USER");

@@ -1,13 +1,26 @@
 import axios from 'axios';
 
 const resolveBaseUrl = () => {
+  let url = '';
   if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+    url = String(import.meta.env.VITE_API_BASE_URL).trim();
+  } else if (typeof window !== 'undefined' && window.__BORROWHUB_CONFIG__?.API_BASE_URL) {
+    url = String(window.__BORROWHUB_CONFIG__.API_BASE_URL).trim();
   }
-  if (typeof window !== 'undefined' && window.__BORROWHUB_CONFIG__?.API_BASE_URL) {
-    return window.__BORROWHUB_CONFIG__.API_BASE_URL;
+
+  if (!url || url === '/api') {
+    return '/api';
   }
-  return '/api';
+
+  // Remove trailing slashes
+  url = url.replace(/\/+$/, '');
+
+  // Ensure /api suffix exists since all backend controllers are mapped under /api/*
+  if (!url.endsWith('/api')) {
+    url += '/api';
+  }
+
+  return url;
 };
 
 const api = axios.create({
