@@ -56,7 +56,7 @@ borrowhub:
   upload:
     dir: ${FILE_UPLOAD_DIR:./uploads}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:${BORROWHUB_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:${BORROWHUB_CORS_ALLOWED_ORIGINS:}}
 
 management:
   endpoints:
